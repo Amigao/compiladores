@@ -1,0 +1,8 @@
+# temp files
+*.swp
+*.swo
+
+# compiled files and executables 
+*.o
+*.out
+*.exe
