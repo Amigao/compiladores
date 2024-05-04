@@ -6,7 +6,6 @@
 
 #define TAMANHO_MAXIMO_LINHA 100
 
-
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Uso: %s <arquivo>\n", argv[0]);
