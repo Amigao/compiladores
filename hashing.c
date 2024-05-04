@@ -28,6 +28,17 @@ void inicializa_tabela(Tabela *tabela) {
     }
 }
 
+char *my_strdup(const char *src) {
+    size_t len = strlen(src) + 1; // +1 para o caractere nulo
+    char *dst = malloc(len);
+    if (dst == NULL) {
+        fprintf(stderr, "Erro ao alocar memória para duplicar a string.");
+        exit(EXIT_FAILURE);
+    }
+    strcpy(dst, src);
+    return dst;
+}
+
 void insere_tabela(Tabela *tabela, char *word){
     int index = hash_function(word);
 
@@ -37,7 +48,8 @@ void insere_tabela(Tabela *tabela, char *word){
         exit(EXIT_FAILURE);
     }
 
-    new_node->word = strdup(word);
+    new_node->word = my_strdup(word);
+
     new_node->next = NULL;
 
     if(tabela->table[index] == NULL){
@@ -49,7 +61,6 @@ void insere_tabela(Tabela *tabela, char *word){
         }
         current->next = new_node;
     }
-    return 0;
 }
 
 // Função de busca

@@ -25,7 +25,7 @@ $(EXEC): $(OBJS)
 .PHONY: run clean
 
 run: $(EXEC)
-	./$(EXEC) < input.txt
+	./$(EXEC) input.txt
 
 clean:
 	rm -f $(EXEC) $(OBJS)
