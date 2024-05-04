@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef HASHING_H
+#define HASHING_H
 
 #define TAMANHO_TABELA 100
 
@@ -24,3 +23,5 @@ void inicializa_tabela(Tabela *tabela, char *word);
 int busca_tabela(Tabela *tabela, char *word);
 
 void liberar_tabela(Tabela *tabela);
+
+#endif
