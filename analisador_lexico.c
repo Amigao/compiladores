@@ -55,7 +55,7 @@ int transicao(int state, char c){
             state = 2;
         }
 
-        else if ((c >= 'A' && c <= 'Z')){
+        else if ((c >= 'A' && c <= 'Zc')){
             state = 2;
         }
 
@@ -103,6 +103,7 @@ void constroi_tabela_reservada(Tabela *tabela){
     insere_tabela(tabela, "PROCEDURE");
     insere_tabela(tabela, "BEGIN");
     insere_tabela(tabela, "END");
+    insere_tabela(tabela, "CALL");
     insere_tabela(tabela, "IF");
     insere_tabela(tabela, "THEN");
     insere_tabela(tabela, "WHILE");

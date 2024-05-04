@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     char buffer[TAMANHO_MAXIMO_LINHA];
     int i = 0;
     while((c = fgetc(file)) != EOF){
-        if ((c != '\n') & (c != ' ')) {
+        if ((c != '\n') & (c != ' ') & (c != ',')) {
             buffer[i++] = c;
         } else {
             buffer[i++] = '\0';
