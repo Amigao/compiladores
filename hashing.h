@@ -18,7 +18,9 @@ typedef struct {
 
 int hash_function(char *word);
 
-void inicializa_tabela(Tabela *tabela, char *word);
+void inicializa_tabela(Tabela *tabela);
+
+void insere_tabela(Tabela *tabela, char *word);
 
 int busca_tabela(Tabela *tabela, char *word);
 

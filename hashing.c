@@ -21,7 +21,14 @@ int hash_function(char *word) {
     return hash % TAMANHO_TABELA;
 }
 
-void inicializa_tabela(Tabela *tabela, char *word){
+// Função para inicializar a tabela de hash
+void inicializa_tabela(Tabela *tabela) {
+    for (int i = 0; i < TAMANHO_TABELA; i++) {
+        tabela->table[i] = NULL;
+    }
+}
+
+void insere_tabela(Tabela *tabela, char *word){
     int index = hash_function(word);
 
     Node *new_node = malloc(sizeof(Node));

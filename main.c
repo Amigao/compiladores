@@ -29,12 +29,12 @@ int main(int argc, char *argv[]) {
             buffer[i++] = '\0';
             i = 0;
             // printf("Palavra lida: %s\n", buffer);
-            analisador_lexico(buffer);
+            printf("PALAVRA: %s; TOKEN: %s\n", buffer, analisador_lexico(buffer));
         }
     }
     buffer[i++] = '\0';
     // printf("Palavra lida: %s\n", buffer);
-    analisador_lexico(buffer);
+    printf("PALAVRA: %s; TOKEN: %s\n", buffer, analisador_lexico(buffer));
     
     fclose(file);
     return 0;
