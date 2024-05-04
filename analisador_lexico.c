@@ -92,23 +92,23 @@ int transicao(int state, char c){
 }
 
 char *verifica_tabela_reservados(Tabela *tabela, char *string){
-    if (busca_tabela(&tabela, string)) return string;
+    if (busca_tabela(tabela, string)) return string;
     else return "ident";
 }
 
 void constroi_tabela_reservada(Tabela *tabela){
-    inicializa_tabela(&tabela);
-    insere_tabela(&tabela, "VAR");
-    insere_tabela(&tabela, "CONST");
-    insere_tabela(&tabela, "PROCEDURE");
-    insere_tabela(&tabela, "BEGIN");
-    insere_tabela(&tabela, "END");
-    insere_tabela(&tabela, "IF");
-    insere_tabela(&tabela, "THEN");
-    insere_tabela(&tabela, "WHILE");
-    insere_tabela(&tabela, "DO");
-    insere_tabela(&tabela, "VAR");
-    insere_tabela(&tabela, "ODD");
+    inicializa_tabela(tabela);
+    insere_tabela(tabela, "VAR");
+    insere_tabela(tabela, "CONST");
+    insere_tabela(tabela, "PROCEDURE");
+    insere_tabela(tabela, "BEGIN");
+    insere_tabela(tabela, "END");
+    insere_tabela(tabela, "IF");
+    insere_tabela(tabela, "THEN");
+    insere_tabela(tabela, "WHILE");
+    insere_tabela(tabela, "DO");
+    insere_tabela(tabela, "VAR");
+    insere_tabela(tabela, "ODD");
 }
 
 char *analisador_lexico(char* string){
@@ -117,7 +117,7 @@ char *analisador_lexico(char* string){
 
     char c = string[0];
     int state = 0;
-    int final_state[NUM_FINAL_STATE] = {1, 2, 3};
+    // int final_state[NUM_FINAL_STATE] = {1, 2, 3};
     
     int i = 0;
     while(c != '\0' && state != -1){
@@ -126,12 +126,9 @@ char *analisador_lexico(char* string){
         c = string[i++];
     }
 
-    // int aceita = 0;
-    // for (int i = 0; i < NUM_FINAL_STATE; i++){
-    //     if (state == final_state[i]) aceita = 1;
-    // }
     
     if (state == 1) return verifica_tabela_reservados(&TabelaReservada, string);
+    // if (state == 1) return "ident";
     if (state == 2) return "ident";
     if (state == 3) return "numero";
 

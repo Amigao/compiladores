@@ -12,7 +12,7 @@ typedef struct {
 
 // Definição das tabelas (de simbolos e palavras reservadas e de simbolos e palavras)
 typedef struct {
-    Node *table[TAMANHO_TABELA]
+    Node *table[TAMANHO_TABELA];
 } Tabela;
 
 
