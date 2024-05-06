@@ -106,7 +106,7 @@ char *analisador_lexico(char* string, Tabela* TabelaReservada){
     int i = 0;
     while(c != '\0' && state != -1){
         state = transicao (state, c);
-        // printf("Estado atual: %d \nCaractere atual: %c\n\n", state, c);
+        //printf("Estado atual: %d \nCaractere atual: %c\n\n", state, c);
         c = string[i++];
     }
 
