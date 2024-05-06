@@ -3,6 +3,7 @@
 *.swo
 
 # compiled files and executables 
+trabalho
 *.o
 *.out
 *.exe
