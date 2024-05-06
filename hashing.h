@@ -5,7 +5,7 @@
 
 
 // Definição dos nós da tabela
-typedef struct {
+typedef struct Node {
     char *word;
     struct Node *next;
 } Node;
