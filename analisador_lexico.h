@@ -1,6 +1,9 @@
 #ifndef ANALISADOR_LEXICO_H
 #define ANALISADOR_LEXICO_H
 
-char *analisador_lexico(char *buffer);
+#include "hashing.h"
+
+void constroi_tabela_reservada(Tabela *tabela);
+char *analisador_lexico(char *buffer, Tabela *TabelaReservada);
     
 #endif

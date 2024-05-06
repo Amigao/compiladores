@@ -112,9 +112,7 @@ void constroi_tabela_reservada(Tabela *tabela){
     insere_tabela(tabela, "ODD");
 }
 
-char *analisador_lexico(char* string){
-    Tabela TabelaReservada;
-    constroi_tabela_reservada(&TabelaReservada);
+char *analisador_lexico(char* string, Tabela* TabelaReservada){
 
     char c = string[0];
     int state = 0;
@@ -128,7 +126,7 @@ char *analisador_lexico(char* string){
     }
 
     
-    if (state == 1) return verifica_tabela_reservados(&TabelaReservada, string);
+    if (state == 1) return verifica_tabela_reservados(&(*TabelaReservada), string);
     // if (state == 1) return "ident";
     if (state == 2) return "ident";
     if (state == 3) return "numero";
