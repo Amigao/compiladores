@@ -55,7 +55,7 @@ int transicao(int state, char c){
             state = 2;
         }
 
-        else if ((c >= 'A' && c <= 'Zc')){
+        else if ((c >= 'A' && c <= 'Z')){
             state = 2;
         }
 
