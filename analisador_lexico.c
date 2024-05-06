@@ -72,21 +72,6 @@ int transicao(int state, char c){
         else state = -1;
 
     }    
-
-    
-    // } else if (state == 1){
-    
-    //     if((c >= '0' && c <= '9')){
-    //         state = 1;
-    //     } else if(c == ',' || c == '.'){
-    //         state = 2;
-    //     } else state = -1;
-    
-    // } else if (state == 2){
-    
-    //     if((c >= '0' && c <= '9')){
-    //         state = 2;
-    //     } else state = -1;
     
     return state;
 }
