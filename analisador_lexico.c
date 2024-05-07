@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "analisador_lexico.h"
 #include "hashing.h"
@@ -10,65 +11,48 @@
 int transicao(int state, char c){
     
     if (state == 0){ // ESTADO q0
-    
-        if ((c >= '0' && c <= '9')){ 
+        if (isdigit(c)){ 
             state = 3;
         } 
-        
-        else if ((c >= 'a' && c <= 'z')){
+        else if (islower(c)){
             state = 2;
         }
-
-        else if ((c >= 'A' && c <= 'Z')){
+        else if (isupper(c)){
             state = 1;
         }
-
         else state = -1;
-
     }
-    
     else if (state == 1){ // ESTADO Q1
-        
-        if ((c >= '0' && c <= '9')){ 
+        if (isdigit(c)){ 
             state = 2;
         } 
-        
-        else if ((c >= 'a' && c <= 'z')){
+        else if (islower(c)){
             state = 2;
         }
-
-        else if ((c >= 'A' && c <= 'Z')){
+        else if (isupper(c)){
             state = 1;
         }
-
         else state = -1;
 
     }
-
     else if (state == 2){ // ESTADO Q2
-        
-        if ((c >= '0' && c <= '9')){ 
+        if (isdigit(c)){ 
             state = 2;
         } 
-        
-        else if ((c >= 'a' && c <= 'z')){
+        else if (islower(c)){
             state = 2;
         }
-
-        else if ((c >= 'A' && c <= 'Z')){
+        else if (isupper(c)){
             state = 2;
         }
-
         else state = -1;
 
     }
-
     else if (state == 3){ // ESTADO Q3
         
-        if ((c >= '0' && c <= '9')){ 
+        if (isdigit(c)){ 
             state = 3;
         } 
-
         else state = -1;
 
     }    
