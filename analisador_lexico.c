@@ -6,63 +6,93 @@
 #include "analisador_lexico.h"
 #include "hashing.h"
 
-#define NUM_FINAL_STATE 3
+int is_first_double_operator(char c){
+    if (c == ':' || c == '!' || c == '<' || c == '>'){
+        return 1;
+    }
+    return 0;
+}
+
+int is_second_double_operator(char c){
+    if (c == '=' || c == '!' || c == '<' || c == '>'){
+        return 1;
+    }
+    return 0;
+}
+
+int is_single_operator(char c){
+    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/'){
+        return 1; 
+    }
+    return 0;
+}
+
+int isdelimiter(char c){
+    if (c == ',' || c == ';' || c == '.'){
+        return 1;
+    }
+    return 0;
+}
+
 
 int transicao(int state, char c){
-    
-    if (state == 0){ // ESTADO q0
-        if (isdigit(c)){ 
-            state = 3;
-        } 
-        else if (islower(c)){
-            state = 2;
-        }
-        else if (isupper(c)){
-            state = 1;
-        }
-        else state = -1;
+    // Estado 3 (Apenas dígitos são aceitos)
+    if (state == 3 && isdigit(c)) {
+        return state;
     }
-    else if (state == 1){ // ESTADO Q1
-        if (isdigit(c)){ 
-            state = 2;
-        } 
-        else if (islower(c)){
-            state = 2;
-        }
-        else if (isupper(c)){
-            state = 1;
-        }
-        else state = -1;
-
+    // Outros estados
+    if (isdigit(c)) {
+        return 3;
     }
-    else if (state == 2){ // ESTADO Q2
-        if (isdigit(c)){ 
-            state = 2;
-        } 
-        else if (islower(c)){
-            state = 2;
-        }
-        else if (isupper(c)){
-            state = 2;
-        }
-        else state = -1;
-
+    if (islower(c)) {
+        return 2;
     }
-    else if (state == 3){ // ESTADO Q3
-        
-        if (isdigit(c)){ 
-            state = 3;
-        } 
-        else state = -1;
-
-    }    
-    
-    return state;
+    if (isupper(c)) {
+        return 1;
+    }
+    if (isspace(c)) {
+        return 4;
+    }
+    if (isdelimiter(c)) {
+        return 5;
+    }
+    if (is_first_double_operator(c)) {
+        return 6;
+    }
+    if (is_second_double_operator(c)) {
+        return 7;
+    }
+    if (is_single_operator(c)) {
+        return 8;
+    }
+    return -1;
 }
 
 char *verifica_tabela_reservados(Tabela *tabela, char *string){
-    if (busca_tabela(tabela, string)) return string;
-    else return "ident";
+    if (busca_tabela(tabela, string)) {
+        return string;
+    } else if (isdigit(string[0])){
+        return "number";
+    } else {
+        return "ident";
+    }
+}
+
+char *verifica_tabela_simbolos(char *string){
+    if (!strcmp(string, ";")){
+       return "simbolo_ponto_virgula"; 
+    } else if (!strcmp(string, ",")){
+        return "simbolo_virgula";
+    } else if (!strcmp(string, ":=")){
+        return "simbolo_atribuicao";
+    } else if (!strcmp(string, "+")){
+        return "simbolo_mais";
+    } else if (!strcmp(string, ".")){
+        return "simbolo_ponto";
+    }
+    else {
+        return "ERRO_LEXICO";
+    } 
 }
 
 void constroi_tabela_reservada(Tabela *tabela){
@@ -81,25 +111,44 @@ void constroi_tabela_reservada(Tabela *tabela){
     insere_tabela(tabela, "ODD");
 }
 
-char *analisador_lexico(char* string, Tabela* TabelaReservada){
+int is_final_state(int state){
+    if (state == 0 || state == 6){
+        return 0;
+    } 
+    return 1;
+}
 
-    char c = string[0];
-    int state = 0;
-    // int final_state[NUM_FINAL_STATE] = {1, 2, 3};
-    
-    int i = 0;
-    while(c != '\0' && state != -1){
-        state = transicao (state, c);
-        //printf("Estado atual: %d \nCaractere atual: %c\n\n", state, c);
-        c = string[i++];
+int changed_state(int state_a, int state_b){
+    if (state_a != state_b){
+        return 1;
     }
+    return 0;
+}
 
-    
-    if (state == 1) return verifica_tabela_reservados(&(*TabelaReservada), string);
-    // if (state == 1) return "ident";
-    if (state == 2) return "ident";
-    if (state == 3) return "numero";
+int buffer_is_symbol(int state){
+    if (state == 5 || state == 6 || state == 7 || state == 8){
+        return 1;
+    }
+    return 0;
+}
 
-    return "ERRO";
-
+int analisador_lexico(char character, char *buffer, Tabela* TabelaReservada, int current_state){
+    int new_state = transicao (current_state, character);
+    if (current_state == -1){
+        printf("%s, ERRO_LEXICO\n", buffer);
+        return CHANGED_STATE;
+    }
+    // se mudou de estado e não é um estado final 
+    if (is_final_state(current_state) && changed_state(current_state, new_state)){
+        // se não é espaço 
+        if (!isspace(buffer[0])){
+            if (buffer_is_symbol(current_state)){
+                printf("%s, %s\n", buffer, verifica_tabela_simbolos(buffer));
+            } else {
+                printf("%s, %s\n", buffer, verifica_tabela_reservados(TabelaReservada, buffer));
+            }  
+        }
+        return CHANGED_STATE;
+    }
+    return new_state;
 }

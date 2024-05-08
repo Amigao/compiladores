@@ -6,7 +6,7 @@
 #include "analisador_lexico.h"
 #include "hashing.h"
 
-#define TAMANHO_MAXIMO_LINHA 100
+#define TAMANHO_MAXIMO_BUFFER 100
 
 int isSymbol(char c){
     char simbolos_especiais[12] = "+-*/()=<>:;.";
@@ -34,50 +34,25 @@ int main(int argc, char *argv[]) {
     // Constroi tabela reservada
     Tabela TabelaReservada;
     constroi_tabela_reservada(&TabelaReservada);
-    
-    int i = 0;
-    char c;
-    char buffer[TAMANHO_MAXIMO_LINHA];
-    // leitura até fim do arquivo PL/0 
-    while((c = fgetc(file)) != EOF){
-        // leitura de caracteres do alfabeto
-        if (isalpha(c)){
-            while (isalnum(c)){
-                buffer[i++] = c;   
-                c = fgetc(file);
-            }
-            ungetc(c, file);
-            buffer[i++] = '\0';
-            i = 0; 
-            printf("%s, %s\n", buffer, analisador_lexico(buffer, &TabelaReservada));
-            continue;
-        } 
-
-        if (isdigit(c)){
-            while (isdigit(c)){
-                buffer[i++] = c;   
-                c = fgetc(file);   
-            }
-            ungetc(c, file);
-            buffer[i++] = '\0';
-            i = 0; 
-            printf("%s, %s\n", buffer, analisador_lexico(buffer, &TabelaReservada));
-            continue; 
-        } 
    
-        if (isSymbol(c)){
-            while (isSymbol(c)){
-                buffer[i++] = c;
-                c = fgetc(file);
-            }
-            ungetc(c, file); 
-            buffer[i++] = '\0';
-            i = 0; 
-            printf("%s, %s\n", buffer, analisador_lexico(buffer, &TabelaReservada));
-            continue; 
+    int current_state = 0;
+    int new_state;
+    char c;
+    char buffer[TAMANHO_MAXIMO_BUFFER];
+    // leitura até fim do arquivo PL/0 
+    int i = 0; 
+    while((c = fgetc(file)) != EOF){
+        new_state = analisador_lexico(c, buffer, &TabelaReservada, current_state); 
+        if (new_state == CHANGED_STATE) {
+            ungetc(c, file);
+            current_state = 0; 
+            i = 0;
+        } else {
+            buffer[i] = c;
+            buffer[i+1] = '\0';
+            current_state = new_state;
+            i++;
         }
-
-        
     }
 
     fclose(file);
