@@ -6,6 +6,7 @@
 #include "hashing.h"
 
 #define TAMANHO_MAXIMO_LINHA 100
+#define DELIMITADOR " \t\n,"
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -19,28 +20,25 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    char c;
-    char buffer[TAMANHO_MAXIMO_LINHA];
-    int i = 0;
+    char buffer[512];
     
     // Constroi tabela reservada
     Tabela TabelaReservada;
     constroi_tabela_reservada(&TabelaReservada);
 
-    while((c = fgetc(file)) != EOF){
-        if ((c != '\n') & (c != ' ') & (c != ',')) {
-            buffer[i++] = c;
-        } else {
-            buffer[i++] = '\0';
-            i = 0;
-            // printf("Palavra lida: %s\n", buffer);
-            printf("PALAVRA: %s; TOKEN: %s\n", buffer, analisador_lexico(buffer, &TabelaReservada));
+    char * parameter;
+
+    while(fgets(buffer, sizeof(buffer),file)){
+        parameter = strtok(buffer, DELIMITADOR);
+        while(parameter != NULL){
+            analisador_lexico(parameter, &TabelaReservada);
+            parameter = strtok(NULL,DELIMITADOR);
         }
     }
-    buffer[i++] = '\0';
-    // printf("Palavra lida: %s\n", buffer);
-    printf("PALAVRA: %s; TOKEN: %s\n", buffer, analisador_lexico(buffer, &TabelaReservada));
+
     
     fclose(file);
+    liberar_tabela(&TabelaReservada);
+    //liberar_tabela(&TabelaSimbolos);
     return 0;
 }
