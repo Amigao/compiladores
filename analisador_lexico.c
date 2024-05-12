@@ -190,8 +190,6 @@ void analisador_lexico(char* string, Tabela* TabelaReservada ){
     strncpy(sub, string +j, i - j);
     sub[i-j] = '\0';
     verifica_estado(curr, sub, TabelaReservada);
-    
-    //char *saida = verifica_estado(curr, string, TabelaReservada);
 }
 
 void constroi_tabela_reservada(Tabela *tabela){

@@ -5,7 +5,7 @@
 #include "analisador_lexico.h"
 #include "hashing.h"
 
-#define TAMANHO_MAXIMO_LINHA 100
+#define TAMANHO_MAXIMO_LINHA 256
 #define DELIMITADOR " \t\n"
 
 int main(int argc, char *argv[]) {
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    char buffer[512];
+    char buffer[TAMANHO_MAXIMO_LINHA];
     
     // Constroi tabela reservada
     Tabela TabelaReservada;
