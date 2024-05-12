@@ -20,48 +20,80 @@ bool isnum(char c){
     return(c>='0' && c<= '9');
 }
 
-int transicao(int state, char c, char a){
-    switch(state){
+bool isoperator(char c){
+    return(c == '+' || c == '-' || c == '*');
+}
+
+bool isponctuation(char c){
+    return(c == ',' || c == ';' || c == '.');
+}
+
+bool isrelation(char c){
+    return(c == '<' || c == '>' || c == '!');
+}
+
+int transicao(int state, char c, char a, Tabela *tabela) {
+    switch(state) {
         case 0:
             if(uppercase(c))state = 1;
             else if(lowercase(c)) state = 2;
             else if(isnum(c)) state = 3;
-            else if(c == '=') state = 4;
+            //else if(c == '=') state = 4;
             else if(c == '!') state = 5;
             else if(c == '<') state = 6;
             else if(c == '>') state = 7;
-            else if(c ==':' && a =='='){
-                state = 8;
-                return state;
-            }
-            else if(c == ';') state = 9;
+            else if(c == ':') state = 8;
+            else if(isponctuation(c)) state = 12;
+            //else if(c == ';') state = 9;
+            //else if(c == ',') state = 10;
+            else if(isoperator(c)) state = 11;
             else return -1;
             break;
         case 1:
             if(uppercase(c)) state = 1;
             else if(lowercase(c) || isnum(c)) state = 2;
+            else if(isponctuation(c) || isrelation(c)) state = 0;
             else return -1;
             break;
         case 2:
             if(uppercase(c) || lowercase(c) || isnum(c)) state = 2;
-            else if(c == ':' || c == ',' || c ==';') return 0;
-         //   else if(a == ':' || a == ',' || a ==';') return 0;
+            else if(c == ':' || c == ',' || c ==';' || isoperator(c) || isrelation(c)) state = 0;
             else return -1;
             break;
         case 3:
             if(isnum(c)) state = 3;
-            else if(c == ';') return 0;
+            else if(c == ';') state = 0;
+            else return -1;
             break;
-        case 4:
-            break;
-        case 5:
-            if(c == '=') state = 5;
+       case 5:
+            if(c == '=' || c == '!') state = 5;
+            else if(uppercase(c) || lowercase(c) || isnum(c)) return 0;
+            else return -1;
             break;
         case 6:
-            if(c == '=') state = 6;
+            if(c == '=' || c == '<') state = 6;
+            else if(uppercase(c) || lowercase(c) || isnum(c)) return 0;
+            else return -1;
             break;
         case 7:
-            if(c == '=') state = 6;
+            if(c == '=' || c == '>') state = 7;
+            else if(uppercase(c) || lowercase(c) || isnum(c)) return 0;
+            else return -1;
+            break;
+        case 8:
+            if(c == '=' || c == ':') state = 8;
+            else if(uppercase(c) || lowercase(c) || isnum(c)) return 0;
+            else return -1;
+            break;
+        case 12:
+            if(isponctuation(c)) return state;
+            else if(uppercase(c) || lowercase(c) || isnum(c)) state = 0;
+            else return -1;
+            break;
+        case 11:
+            if(isoperator(c)) return 11;
+            else if(uppercase(c) || lowercase(c) || isnum(c)) state = 0;
+            else return -1;
             break;
     }
     return state;
@@ -73,10 +105,18 @@ char *verifica_tabela_reservados(Tabela *tabela1, char *string){
     else return "ident";
 }
 
-void verifica_estado(int curr, char *sub){
+bool olha_tabela(Tabela *tabela, char *string){
+    return(busca_tabela(tabela,string));
+}
+
+void verifica_estado(int curr, char *sub, Tabela *tabela){
             switch (curr){
                 case 1:
-                    printf("Token %s RESERVADO\n", sub);
+                    if(verifica_tabela_reservados(tabela, sub)){
+                        printf("Token %s RESERVADO\n", sub);
+                    }else{
+                        printf("Token %s identificador\n", sub);
+                    }
                     break; 
                 case 2:
                     printf("Token %s identificador\n", sub);
@@ -102,6 +142,18 @@ void verifica_estado(int curr, char *sub){
                 case 9:
                     printf("Token %s ponto_virgula\n", sub);
                     break;
+                case 10:
+                    printf("Token %s virgula\n", sub);
+                    break;
+                case 11:
+                    printf("Token %s operador\n", sub);
+                    break;
+                case -1:
+                    printf("ERRO LEXIXO,  %s\n",sub);
+                    break;
+                case 12: 
+                    printf("Token %s pontuacao\n", sub);
+                    break;
             }
 }
 
@@ -119,12 +171,12 @@ void analisador_lexico(char* string, Tabela* TabelaReservada ){
 
     while(c != '\0'){
         a = string[i];
-        state = transicao(state,c,a);
+        state = transicao(state,c,a, TabelaReservada);
         if(state == 0){
             i--;
             strncpy(sub,string + j,i-j);
             sub[i-j] = '\0';
-            verifica_estado(curr, sub);
+            verifica_estado(curr, sub, TabelaReservada);
             j = i;
             state =0;
             curr = 0;
@@ -136,7 +188,7 @@ void analisador_lexico(char* string, Tabela* TabelaReservada ){
     }
     strncpy(sub, string +j, i - j);
     sub[i-j] = '\0';
-    verifica_estado(curr, sub);
+    verifica_estado(curr, sub, TabelaReservada);
     
     //char *saida = verifica_estado(curr, string, TabelaReservada);
 }
@@ -154,6 +206,22 @@ void constroi_tabela_reservada(Tabela *tabela){
     insere_tabela(tabela, "WHILE");
     insere_tabela(tabela, "DO");
     insere_tabela(tabela, "ODD");
+    insere_tabela(tabela, "+");
+    insere_tabela(tabela, "-");
+    insere_tabela(tabela, "*");
+    insere_tabela(tabela, "/");
+    insere_tabela(tabela, "=");
+    insere_tabela(tabela, "<>");
+    insere_tabela(tabela, "<");
+    insere_tabela(tabela, "<=");
+    insere_tabela(tabela, ">");
+    insere_tabela(tabela, ">=");
+    insere_tabela(tabela, ":=");
+    insere_tabela(tabela, "(");
+    insere_tabela(tabela, ")");
+    insere_tabela(tabela, ",");
+    insere_tabela(tabela, ";");
+    insere_tabela(tabela, ".");
 }
 
 void constroi_tabela_simbolos(Tabela *tabela){

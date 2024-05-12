@@ -6,7 +6,7 @@
 #include "hashing.h"
 
 #define TAMANHO_MAXIMO_LINHA 100
-#define DELIMITADOR " \t\n,"
+#define DELIMITADOR " \t\n"
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
