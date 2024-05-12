@@ -39,6 +39,5 @@ int main(int argc, char *argv[]) {
     
     fclose(file);
     liberar_tabela(&TabelaReservada);
-    //liberar_tabela(&TabelaSimbolos);
     return 0;
 }

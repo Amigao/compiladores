@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -32,20 +33,17 @@ bool isrelation(char c){
     return(c == '<' || c == '>' || c == '!');
 }
 
-int transicao(int state, char c, char a, Tabela *tabela) {
+int transicao(int state, char c) {
     switch(state) {
         case 0:
             if(uppercase(c))state = 1;
             else if(lowercase(c)) state = 2;
             else if(isnum(c)) state = 3;
-            //else if(c == '=') state = 4;
             else if(c == '!') state = 5;
             else if(c == '<') state = 6;
             else if(c == '>') state = 7;
             else if(c == ':') state = 8;
             else if(isponctuation(c)) state = 12;
-            //else if(c == ';') state = 9;
-            //else if(c == ',') state = 10;
             else if(isoperator(c)) state = 11;
             else return -1;
             break;
@@ -101,7 +99,6 @@ int transicao(int state, char c, char a, Tabela *tabela) {
 
 char *verifica_tabela_reservados(Tabela *tabela1, char *string){
     if (busca_tabela(tabela1, string)) return string;
-  //  if(busca_tabela(tabela2,string)) return string;
     else return "ident";
 }
 
@@ -110,13 +107,11 @@ bool olha_tabela(Tabela *tabela, char *string){
 }
 
 void verifica_estado(int curr, char *sub, Tabela *tabela){
+            char* saida;
             switch (curr){
                 case 1:
-                    if(verifica_tabela_reservados(tabela, sub)){
-                        printf("Token %s RESERVADO\n", sub);
-                    }else{
-                        printf("Token %s identificador\n", sub);
-                    }
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n", saida, sub);
                     break; 
                 case 2:
                     printf("Token %s identificador\n", sub);
@@ -128,31 +123,39 @@ void verifica_estado(int curr, char *sub, Tabela *tabela){
                     printf("Token %s igual\n", sub);
                     break;
                 case 5:
-                    printf("Token %s diferente\n", sub);
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n",saida, sub);
                     break;
                 case 6:
-                    printf("Token %s menor\n", sub);
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n", saida, sub);
                     break;
                 case 7:
-                    printf("Token %s maior\n", sub);
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n",saida, sub);
                     break;
                 case 8:
-                    printf("Token %s atribuicao\n", sub);
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n",saida, sub);
                     break;
                 case 9:
-                    printf("Token %s ponto_virgula\n", sub);
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n",saida, sub);
                     break;
                 case 10:
-                    printf("Token %s virgula\n", sub);
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n", saida, sub);
                     break;
                 case 11:
-                    printf("Token %s operador\n", sub);
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n", saida, sub);
                     break;
                 case -1:
                     printf("ERRO LEXIXO,  %s\n",sub);
                     break;
                 case 12: 
-                    printf("Token %s pontuacao\n", sub);
+                    saida = verifica_tabela_reservados(tabela, sub);
+                    printf("Token %s %s\n",saida,  sub);
                     break;
             }
 }
@@ -165,13 +168,11 @@ void analisador_lexico(char* string, Tabela* TabelaReservada ){
     char c = string[i++];
     int state =0;
     int curr =0;
-    char a;
     char sub[256];
 
 
     while(c != '\0'){
-        a = string[i];
-        state = transicao(state,c,a, TabelaReservada);
+        state = transicao(state,c);
         if(state == 0){
             i--;
             strncpy(sub,string + j,i-j);
