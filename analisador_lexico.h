@@ -4,8 +4,7 @@
 #include "hashing.h"
 
 void constroi_tabela_reservada(Tabela *tabela);
-void analisador_lexico(char *buffer, Tabela *TabelaReservada);
-void constroi_tabela_simbolos(Tabela *tabela);
+void analisador_lexico(char *buffer, Tabela *TabelaReservada, FILE *output_file);
     
 #endif
 

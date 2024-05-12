@@ -14,9 +14,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    FILE *file = fopen(argv[1], "r");
-    if (file == NULL) {
+    FILE *input_file = fopen(argv[1], "r");
+    if (input_file == NULL) {
         printf("Erro ao abrir o arquivo.\n");
+        return 1;
+    }
+
+    FILE *output_file = fopen("output.txt", "w");
+    if (output_file == NULL) {
+        printf("Erro ao criar o arquivo de saída.\n");
+        fclose(output_file);
         return 1;
     }
 
@@ -28,16 +35,16 @@ int main(int argc, char *argv[]) {
 
     char * parameter;
 
-    while(fgets(buffer, sizeof(buffer),file)){
+    while(fgets(buffer, sizeof(buffer), input_file)){
         parameter = strtok(buffer, DELIMITADOR);
         while(parameter != NULL){
-            analisador_lexico(parameter, &TabelaReservada);
+            analisador_lexico(parameter, &TabelaReservada, output_file);
             parameter = strtok(NULL,DELIMITADOR);
         }
     }
-
     
-    fclose(file);
+    fclose(input_file);
+    fclose(output_file);
     liberar_tabela(&TabelaReservada);
     return 0;
 }

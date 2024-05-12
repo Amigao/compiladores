@@ -33,6 +33,43 @@ bool isrelation(char c){
     return(c == '<' || c == '>' || c == '!');
 }
 
+void constroi_tabela_reservada(Tabela *tabela){
+    inicializa_tabela(tabela);
+    insere_tabela(tabela, "CONST",  "<CONST>");
+    insere_tabela(tabela, "VAR", "<VAR>");
+    insere_tabela(tabela, "PROCEDURE", "<PROCEDURE>");
+    insere_tabela(tabela, "BEGIN", "<BEGIN>");
+    insere_tabela(tabela, "END", "<END>");
+    insere_tabela(tabela, "CALL", "<CALL>");
+    insere_tabela(tabela, "IF", "<IF>");
+    insere_tabela(tabela, "THEN", "<THEN>");
+    insere_tabela(tabela, "WHILE", "<WHILE>");
+    insere_tabela(tabela, "DO", "<DO>");
+    insere_tabela(tabela, "ODD", "<ODD>");
+    insere_tabela(tabela, "+", "<SIMBOLO_SOMA>");
+    insere_tabela(tabela, "-", "<SIMBOLO_SUBTRACAO>");
+    insere_tabela(tabela, "*", "<SIMBOLO_MULTIPLICACAO>");
+    insere_tabela(tabela, "/", "<SIMBOLO_DIVISAO>");
+    insere_tabela(tabela, "=", "<SIMBOLO_IGUAL>");
+    insere_tabela(tabela, "<>", "<SIMBOLO_DIFERENTE>");
+    insere_tabela(tabela, "<", "<SIMBOLO_MENOR>");
+    insere_tabela(tabela, "<=", "<SIMBOLO_MENOR_IGUAL>");
+    insere_tabela(tabela, ">", "<SIMBOLO_MAIOR>");
+    insere_tabela(tabela, ">=", "<SIMBOLO_MAIOR_IGUAL>");
+    insere_tabela(tabela, ":=", "<SIMBOLO_ATRIBUICAO>");
+    insere_tabela(tabela, "(", "<PARENTESE_ESQUERDA>");
+    insere_tabela(tabela, ")", "<PARENTESE_DIREITA>");
+    insere_tabela(tabela, ",", "<VIRGULA>");
+    insere_tabela(tabela, ";", "<PONTO_E_VIRGULA>");
+    insere_tabela(tabela, ".", "<PONTO>");
+}
+
+char *verifica_tabela_reservados(Tabela *tabela, char *string){
+    char *resultado = busca_tabela(tabela, string);
+    if (resultado != NULL) return resultado;
+    else return "ident";
+}
+
 int transicao(int state, char c) {
     switch(state) {
         case 0:
@@ -97,72 +134,39 @@ int transicao(int state, char c) {
     return state;
 }
 
-char *verifica_tabela_reservados(Tabela *tabela1, char *string){
-    if (busca_tabela(tabela1, string)) return string;
-    else return "ident";
+void verifica_estado(int curr, char *sub, Tabela *tabela, FILE *output_file) {
+    char* saida;
+    switch (curr) {
+        case 1:
+            saida = verifica_tabela_reservados(tabela, sub);
+            fprintf(output_file, "%s, %s\n", sub, saida);
+            break;
+        case 2:
+            fprintf(output_file, "%s, identificador\n", sub);
+            break;
+        case 3:
+            fprintf(output_file, "%s, numero\n", sub);
+            break;
+        case 4:
+            fprintf(output_file, "Token %s igual\n", sub);
+            break;
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+            saida = verifica_tabela_reservados(tabela, sub);
+            fprintf(output_file, "%s, %s\n", sub, saida);
+            break;
+        case -1:
+            fprintf(output_file, "%s, ERRO LEXICO \n", sub);
+            break;
+    }
 }
-
-bool olha_tabela(Tabela *tabela, char *string){
-    return(busca_tabela(tabela,string));
-}
-
-void verifica_estado(int curr, char *sub, Tabela *tabela){
-            char* saida;
-            switch (curr){
-                case 1:
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n", saida, sub);
-                    break; 
-                case 2:
-                    printf("Token %s identificador\n", sub);
-                    break;
-                case 3:
-                    printf("Token %s Numero\n", sub);
-                    break;
-                case 4:
-                    printf("Token %s igual\n", sub);
-                    break;
-                case 5:
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n",saida, sub);
-                    break;
-                case 6:
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n", saida, sub);
-                    break;
-                case 7:
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n",saida, sub);
-                    break;
-                case 8:
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n",saida, sub);
-                    break;
-                case 9:
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n",saida, sub);
-                    break;
-                case 10:
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n", saida, sub);
-                    break;
-                case 11:
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n", saida, sub);
-                    break;
-                case -1:
-                    printf("ERRO LEXIXO,  %s\n",sub);
-                    break;
-                case 12: 
-                    saida = verifica_tabela_reservados(tabela, sub);
-                    printf("Token %s %s\n",saida,  sub);
-                    break;
-            }
-}
-
-
-void analisador_lexico(char* string, Tabela* TabelaReservada ){
-
+void analisador_lexico(char* string, Tabela* tabela, FILE *output_file){
     int i =0;
     int j =0;
     char c = string[i++];
@@ -170,14 +174,13 @@ void analisador_lexico(char* string, Tabela* TabelaReservada ){
     int curr =0;
     char sub[256];
 
-
     while(c != '\0'){
         state = transicao(state,c);
         if(state == 0){
             i--;
             strncpy(sub,string + j,i-j);
             sub[i-j] = '\0';
-            verifica_estado(curr, sub, TabelaReservada);
+            verifica_estado(curr, sub, tabela, output_file);
             j = i;
             state =0;
             curr = 0;
@@ -189,56 +192,5 @@ void analisador_lexico(char* string, Tabela* TabelaReservada ){
     }
     strncpy(sub, string +j, i - j);
     sub[i-j] = '\0';
-    verifica_estado(curr, sub, TabelaReservada);
+    verifica_estado(curr, sub, tabela, output_file);
 }
-
-void constroi_tabela_reservada(Tabela *tabela){
-    inicializa_tabela(tabela);
-    insere_tabela(tabela, "CONST");
-    insere_tabela(tabela, "VAR");
-    insere_tabela(tabela, "PROCEDURE");
-    insere_tabela(tabela, "BEGIN");
-    insere_tabela(tabela, "END");
-    insere_tabela(tabela, "CALL");
-    insere_tabela(tabela, "IF");
-    insere_tabela(tabela, "THEN");
-    insere_tabela(tabela, "WHILE");
-    insere_tabela(tabela, "DO");
-    insere_tabela(tabela, "ODD");
-    insere_tabela(tabela, "+");
-    insere_tabela(tabela, "-");
-    insere_tabela(tabela, "*");
-    insere_tabela(tabela, "/");
-    insere_tabela(tabela, "=");
-    insere_tabela(tabela, "<>");
-    insere_tabela(tabela, "<");
-    insere_tabela(tabela, "<=");
-    insere_tabela(tabela, ">");
-    insere_tabela(tabela, ">=");
-    insere_tabela(tabela, ":=");
-    insere_tabela(tabela, "(");
-    insere_tabela(tabela, ")");
-    insere_tabela(tabela, ",");
-    insere_tabela(tabela, ";");
-    insere_tabela(tabela, ".");
-}
-
-void constroi_tabela_simbolos(Tabela *tabela){
-    insere_tabela(tabela, "+");
-    insere_tabela(tabela, "-");
-    insere_tabela(tabela, "*");
-    insere_tabela(tabela, "/");
-    insere_tabela(tabela, "=");
-    insere_tabela(tabela, "<>");
-    insere_tabela(tabela, "<");
-    insere_tabela(tabela, "<=");
-    insere_tabela(tabela, ">");
-    insere_tabela(tabela, ">=");
-    insere_tabela(tabela, ":=");
-    insere_tabela(tabela, "(");
-    insere_tabela(tabela, ")");
-    insere_tabela(tabela, ",");
-    insere_tabela(tabela, ";");
-    insere_tabela(tabela, ".");
-}
-
