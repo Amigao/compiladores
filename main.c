@@ -47,6 +47,10 @@ int main(int argc, char *argv[]) {
             ungetc(c, file);
             current_state = 0; 
             i = 0;
+        } else if (new_state == -1){
+            printf("ERRO_LEXICO\n");
+            current_state = 0;
+            i = 0;
         } else {
             buffer[i] = c;
             buffer[i+1] = '\0';

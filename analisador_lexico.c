@@ -36,6 +36,10 @@ int isdelimiter(char c){
 
 
 int transicao(int state, char c){
+    if (state == 3 && isalpha(c)){
+        return -1;
+    }
+
     // identificadores com números
     if (state == 2 && isdigit(c)){
         return state;
@@ -141,10 +145,8 @@ int buffer_is_symbol(int state){
 
 int analisador_lexico(char character, char *buffer, Tabela* TabelaReservada, int current_state){
     int new_state = transicao (current_state, character);
-    if (current_state == -1){
-        printf("%s, ERRO_LEXICO\n", buffer);
-        return END_BUFFER;
-    }
+    if (new_state == -1) return new_state; 
+    //printf("new_state = %d | current_state = %d | character = %c \n", new_state, current_state, character);
     // se mudou de estado e não é um estado final 
     if (is_final_state(current_state) && changed_state(current_state, new_state)){
         // se não é espaço 
