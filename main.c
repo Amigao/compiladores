@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #include "analisador_lexico.h"
+#include "errors_management.h"
 #include "hashing.h"
 
 #define TAMANHO_MAXIMO_BUFFER 100

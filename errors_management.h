@@ -2,15 +2,15 @@
 #define ERRORS_MANAGEMENT_H
 
 // Definição da estrutura para um nó da lista ligada
-typedef struct Node {
+typedef struct Errors{
     char *word;
     char *token;
     int line;
-    struct Node *next;
-} Node;
+    struct Errors *next;
+} Errors;
 
-void free_error_list(Node *head);
-void insert_error(Node **head, char *word, char *token, int line);
-Node *create_node(char *word, char *token, int line);
+void free_error_list(Errors *head);
+void insert_error(Errors **head, char *word, char *token, int line);
+Errors *create_node(char *word, char *token, int line);
 
 #endif 
