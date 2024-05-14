@@ -3,6 +3,7 @@
 
 #define TAMANHO_TABELA 100
 
+#include <stdbool.h>
 
 // Definição dos nós da tabela
 typedef struct Node {
@@ -16,6 +17,13 @@ typedef struct {
     Node *table[TAMANHO_TABELA];
 } Tabela;
 
+typedef struct lexico{
+    char *token;
+    char *identficador;
+    int state;
+    int line;
+    bool final;
+}lexico;
 
 int hash_function(char *word);
 

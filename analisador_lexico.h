@@ -3,9 +3,11 @@
 
 #include "hashing.h"
 
+#define INITIAL_STATE 0 
+#define END_BUFFER 100
+#define ERRO_LEXICO 20
+
 void constroi_tabela_reservada(Tabela *tabela);
-char *analisador_lexico(char *buffer, Tabela *TabelaReservada, FILE *output_file);
+lexico analisador_lexico(char character, char* buffer, Tabela *TabelaReservada, int current_state);
     
 #endif
-
-

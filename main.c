@@ -1,12 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "analisador_lexico.h"
 #include "hashing.h"
 
-#define TAMANHO_MAXIMO_LINHA 256
-#define DELIMITADOR " \t\n"
+#define TAMANHO_MAXIMO_BUFFER 100
+
+
+int isSymbol(char c){
+    char simbolos_especiais[12] = "+-*/()=<>:;.";
+    for (size_t j = 0; j < strlen(simbolos_especiais); j++) {
+        if (c == simbolos_especiais[j]) {
+            return 1; 
+        }
+    }
+    return 0;
+}
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -14,39 +25,52 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    FILE *input_file = fopen(argv[1], "r");
-    if (input_file == NULL) {
+    FILE *file = fopen(argv[1], "r");
+    if (file == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
     }
 
-    FILE *output_file = fopen("output.txt", "w");
-    if (output_file == NULL) {
-        printf("Erro ao criar o arquivo de saída.\n");
-        fclose(output_file);
-        return 1;
-    }
-
-    char buffer[TAMANHO_MAXIMO_LINHA];
     
     // Constroi tabela reservada
     Tabela TabelaReservada;
     constroi_tabela_reservada(&TabelaReservada);
-
-    char * parameter;
-    int linha_atual = 0;
-
-    while(fgets(buffer, sizeof(buffer), input_file)){
-        linha_atual++;
-        parameter = strtok(buffer, DELIMITADOR);
-        while(parameter != NULL){
-            printf("TOKEN: %s", analisador_lexico(parameter, &TabelaReservada, output_file));
-            parameter = strtok(NULL,DELIMITADOR);
+   
+    int current_state = 0;
+//    int new_state;
+    char c;
+    char buffer[TAMANHO_MAXIMO_BUFFER];
+    // leitura até fim do arquivo PL/0 
+    int i = 0;
+    int number_of_lines = 0;
+    lexico tok;
+    tok.line =0;
+    while((c = fgetc(file)) != EOF){
+        tok = analisador_lexico(c, buffer, &TabelaReservada, current_state); 
+        if (tok.state == END_BUFFER) {
+            ungetc(c, file);
+            if (c == '\n'){
+                number_of_lines++;
+                tok.line ++;
+            }
+            current_state = 0; 
+            i = 0;
+            if(tok.final){
+                printf("%s, %s\n",tok.token, tok.identficador);
+            }
+        } else if (tok.state == -1){
+     //       printf("ERRO_LEXICO\n");
+            printf("%s, %s\n", tok.token, "Erro");
+            current_state = 0;
+            i = 0;
+        } else {
+            buffer[i] = c;
+            buffer[i+1] = '\0';
+            current_state = tok.state;
+            i++;
         }
     }
-    
-    fclose(input_file);
-    fclose(output_file);
-    liberar_tabela(&TabelaReservada);
+    printf("number of lines = %d\n", number_of_lines);
+    fclose(file);
     return 0;
 }

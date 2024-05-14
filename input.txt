@@ -1,16 +1,6 @@
-VAR x,squ;
-
-PROCEDURE square;
+VAR michel123,b,c;
 BEGIN
-   squ:=x*x
-END;
-
-BEGIN
-   x:=1;
-   WHILE x<=10 DO
-   BEGIN
-      CALL square;
-      !squ;
-      x:=x@ + 1
-   END
+    a:=0;
+    b:=3x;
+    c:=@+b;
 END.

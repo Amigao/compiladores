@@ -1,36 +1,112 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+#include <ctype.h>
 
 #include "analisador_lexico.h"
 #include "hashing.h"
 
-#define NUM_FINAL_STATE 3
 
-bool uppercase(char c){
-    return(c >= 'A' && c <= 'Z');
+
+int is_first_double_operator(char c){
+    if (c == ':' || c == '!' || c == '<' || c == '>'){
+        return 1;
+    }
+    return 0;
 }
 
-bool lowercase(char c){
-    return(c >= 'a' && c <= 'z');
+int is_second_double_operator(char c){
+    if (c == '=' || c == '!' || c == '<' || c == '>'){
+        return 1;
+    }
+    return 0;
 }
 
-bool isnum(char c){
-    return(c>='0' && c<= '9');
+int is_single_operator(char c){
+    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/'){
+        return 1; 
+    }
+    return 0;
 }
 
-bool isoperator(char c){
-    return(c == '+' || c == '-' || c == '*');
+int isdelimiter(char c){
+    if (c == ',' || c == ';' || c == '.'){
+        return 1;
+    }
+    return 0;
 }
 
-bool isponctuation(char c){
-    return(c == ',' || c == ';' || c == '.');
+
+int transicao(int state, char c){
+    if (state == 3 && isalpha(c)){
+        return -1;
+    }
+
+    // identificadores com números
+    if (state == 2 && isdigit(c)){
+        return state;
+    }
+    // palavras reservadas 
+    if (isupper(c)) {
+        return 1;
+    }
+    // identificadores
+    if (islower(c)) {
+        return 2;
+    } 
+    // números
+    if (isdigit(c)) {
+        return 3;
+    }
+    // espaço - descartado na lógica principal
+    if (isspace(c)) {
+        return 4;
+    }
+    // delimitador 
+    if (isdelimiter(c)) {
+        return 5;
+    }
+    // primeiro caractere de um operador com dois caracteres
+    if (is_first_double_operator(c)) {
+        return 6;
+    }
+    // segundo caractere de um operador com dois caracteres
+    if (is_second_double_operator(c)) {
+        return 7;
+    }
+    // operador com um caractere
+    if (is_single_operator(c)) {
+        return 8;
+    }
+    return -1;
 }
 
-bool isrelation(char c){
-    return(c == '<' || c == '>' || c == '!');
+char *verifica_tabela_reservados(Tabela *tabela, char *string){
+    char *resultado = busca_tabela(tabela, string);
+    if(isdigit(string[0])){
+        return "number";
+    }else if (resultado) {
+        return resultado;
+    } else {
+        return "ident";
+    }
+}
+
+char *verifica_tabela_simbolos(char *string){
+    if (!strcmp(string, ";")){
+       return "simbolo_ponto_virgula"; 
+    } else if (!strcmp(string, ",")){
+        return "simbolo_virgula";
+    } else if (!strcmp(string, ":=")){
+        return "simbolo_atribuicao";
+    } else if (!strcmp(string, "+")){
+        return "simbolo_mais";
+    } else if (!strcmp(string, ".")){
+        return "simbolo_ponto";
+    }
+    else {
+        return "ERRO_LEXICO";
+    } 
 }
 
 void constroi_tabela_reservada(Tabela *tabela){
@@ -64,136 +140,54 @@ void constroi_tabela_reservada(Tabela *tabela){
     insere_tabela(tabela, ".", "<PONTO>");
 }
 
-char *verifica_tabela_reservados(Tabela *tabela, char *string){
-    char *resultado = busca_tabela(tabela, string);
-    if (resultado != NULL) return resultado;
-    else return "ident";
+int is_final_state(int state){
+    if (state == 0 || state == 6){
+        return 0;
+    } 
+    return 1;
 }
 
-int transicao(int state, char c) {
-    switch(state) {
-        case 0:
-            if(uppercase(c))state = 1;
-            else if(lowercase(c)) state = 2;
-            else if(isnum(c)) state = 3;
-            else if(c == '!') state = 5;
-            else if(c == '<') state = 6;
-            else if(c == '>') state = 7;
-            else if(c == ':') state = 8;
-            else if(isponctuation(c)) state = 12;
-            else if(isoperator(c)) state = 11;
-            else return -1;
-            break;
-        case 1:
-            if(uppercase(c)) state = 1;
-            else if(lowercase(c) || isnum(c)) state = 2;
-            else if(isponctuation(c) || isrelation(c)) state = 0;
-            else return -1;
-            break;
-        case 2:
-            if(uppercase(c) || lowercase(c) || isnum(c)) state = 2;
-            else if(c == ':' || c == ',' || c ==';' || isoperator(c) || isrelation(c)) state = 0;
-            else return -1;
-            break;
-        case 3:
-            if(isnum(c)) state = 3;
-            else if(c == ';') state = 0;
-            else return -1;
-            break;
-       case 5:
-            if(c == '=' || c == '!') state = 5;
-            else if(uppercase(c) || lowercase(c) || isnum(c)) return 0;
-            else return -1;
-            break;
-        case 6:
-            if(c == '=' || c == '<') state = 6;
-            else if(uppercase(c) || lowercase(c) || isnum(c)) return 0;
-            else return -1;
-            break;
-        case 7:
-            if(c == '=' || c == '>') state = 7;
-            else if(uppercase(c) || lowercase(c) || isnum(c)) return 0;
-            else return -1;
-            break;
-        case 8:
-            if(c == '=' || c == ':') state = 8;
-            else if(uppercase(c) || lowercase(c) || isnum(c)) return 0;
-            else return -1;
-            break;
-        case 12:
-            if(isponctuation(c)) return state;
-            else if(uppercase(c) || lowercase(c) || isnum(c)) state = 0;
-            else return -1;
-            break;
-        case 11:
-            if(isoperator(c)) return 11;
-            else if(uppercase(c) || lowercase(c) || isnum(c)) state = 0;
-            else return -1;
-            break;
+int changed_state(int state_a, int state_b){
+    if (state_a != state_b){
+        return 1;
     }
-    return state;
+    return 0;
 }
 
-char *verifica_estado(int curr, char *sub, Tabela *tabela, FILE *output_file) {
-    char* saida;
-    switch (curr) {
-        case 1:
-            saida = verifica_tabela_reservados(tabela, sub);
-            fprintf(output_file, "%s, %s\n", sub, saida);
-            break;
-        case 2:
-            fprintf(output_file, "%s, identificador\n", sub);
-            saida = "identificador";
-            break;
-        case 3:
-            fprintf(output_file, "%s, numero\n", sub);
-            saida = "numero";
-            break;
-        case 4:
-            fprintf(output_file, "Token %s igual\n", sub);
-            break;
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-            saida = verifica_tabela_reservados(tabela, sub);
-            fprintf(output_file, "%s, %s\n", sub, saida);
-            break;
-        case -1:
-            saida = "ERRO_LEXICO";
-            fprintf(output_file, "%s, ERRO LEXICO \n", sub);
-            break;
+int buffer_is_symbol(int state){
+    if (state == 5 || state == 6 || state == 7 || state == 8){
+        return 1;
     }
-    return saida;
+    return 0;
 }
-char *analisador_lexico(char* string, Tabela* tabela, FILE *output_file){
-    int i =0;
-    int j =0;
-    char c = string[i++];
-    int state =0;
-    int curr =0;
-    char sub[256];
 
-    while(c != '\0'){
-        state = transicao(state,c);
-        if(state == 0){
-            i--;
-            strncpy(sub,string + j,i-j);
-            sub[i-j] = '\0';
-            verifica_estado(curr, sub, tabela, output_file);
-            j = i;
-            state = 0;
-            curr = 0;
+lexico analisador_lexico(char character, char *buffer, Tabela* TabelaReservada, int current_state){
+    lexico tok;
+    tok.final = false;
+    int new_state = transicao (current_state, character);
+    if (new_state == -1){
+        tok.token = buffer;
+        tok.identficador = "Erro";
+        tok.state = new_state;
+        int length = strlen(tok.token);
+        tok.token[length] = character;
+        tok.token[length + 1] = '\0';
+        return tok;
+    }
+    //printf("new_state = %d | current_state = %d | character = %c \n", new_state, current_state, character);
+    // se mudou de estado e não é um estado final 
+    if (is_final_state(current_state) && changed_state(current_state, new_state)){
+        // se não é espaço 
+        if (!isspace(buffer[0])){
+            tok.token = buffer;
+            tok.identficador = verifica_tabela_reservados(TabelaReservada,buffer);
+            tok.final = true;
         }
-        else{
-            curr = state;
-            c = string[i++];
-        }
+        tok.state = END_BUFFER;
+        return tok;
     }
-    strncpy(sub, string + j, i - j);
-    sub[i-j] = '\0';
-    return verifica_estado(curr, sub, tabela, output_file);
+    tok.token = buffer;
+    tok.identficador = NULL;
+    tok.state = new_state;
+    return tok;
 }
