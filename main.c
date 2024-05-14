@@ -40,11 +40,15 @@ int main(int argc, char *argv[]) {
     char c;
     char buffer[TAMANHO_MAXIMO_BUFFER];
     // leitura até fim do arquivo PL/0 
-    int i = 0; 
+    int i = 0;
+    int number_of_lines = 0;
     while((c = fgetc(file)) != EOF){
         new_state = analisador_lexico(c, buffer, &TabelaReservada, current_state); 
         if (new_state == END_BUFFER) {
             ungetc(c, file);
+            if (c == '\n'){
+                number_of_lines++;
+            }
             current_state = 0; 
             i = 0;
         } else if (new_state == -1){
@@ -58,7 +62,7 @@ int main(int argc, char *argv[]) {
             i++;
         }
     }
-
+    printf("number of lines = %d\n", number_of_lines);
     fclose(file);
     return 0;
 }
