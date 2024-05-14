@@ -3,10 +3,12 @@
 
 #define TAMANHO_TABELA 100
 
+#include <stdbool.h>
 
 // Definição dos nós da tabela
 typedef struct Node {
     char *word;
+    char *token;
     struct Node *next;
 } Node;
 
@@ -15,14 +17,21 @@ typedef struct {
     Node *table[TAMANHO_TABELA];
 } Tabela;
 
+typedef struct lexico{
+    char *token;
+    char *identficador;
+    int state;
+    int line;
+    bool final;
+}lexico;
 
 int hash_function(char *word);
 
 void inicializa_tabela(Tabela *tabela);
 
-void insere_tabela(Tabela *tabela, char *word);
+void insere_tabela(Tabela *tabela, char *word, char *token);
 
-int busca_tabela(Tabela *tabela, char *word);
+char *busca_tabela(Tabela *tabela, char *word);
 
 void liberar_tabela(Tabela *tabela);
 
