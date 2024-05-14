@@ -1,11 +1,8 @@
 VAR, <VAR>
 x, identificador
-,, <VIRGULA>
 squ, identificador
-;, <PONTO_E_VIRGULA>
 PROCEDURE, <PROCEDURE>
 square, identificador
-;, <PONTO_E_VIRGULA>
 BEGIN, <BEGIN>
 squ, identificador
 :=, <SIMBOLO_ATRIBUICAO>
@@ -13,12 +10,10 @@ x, identificador
 *, <SIMBOLO_MULTIPLICACAO>
 x, identificador
 END, <END>
-;, <PONTO_E_VIRGULA>
 BEGIN, <BEGIN>
 x, identificador
 :=, <SIMBOLO_ATRIBUICAO>
 1, numero
-;, <PONTO_E_VIRGULA>
 WHILE, <WHILE>
 x, identificador
 <=, <SIMBOLO_MENOR_IGUAL>
@@ -27,10 +22,8 @@ DO, <DO>
 BEGIN, <BEGIN>
 CALL, <CALL>
 square, identificador
-;, <PONTO_E_VIRGULA>
 !, ident
 squ, identificador
-;, <PONTO_E_VIRGULA>
 x, identificador
 :=, <SIMBOLO_ATRIBUICAO>
 x@, ERRO LEXICO 
@@ -38,4 +31,3 @@ x@, ERRO LEXICO
 1, numero
 END, <END>
 END, <END>
-., <PONTO>

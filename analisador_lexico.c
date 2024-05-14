@@ -134,7 +134,7 @@ int transicao(int state, char c) {
     return state;
 }
 
-void verifica_estado(int curr, char *sub, Tabela *tabela, FILE *output_file) {
+char *verifica_estado(int curr, char *sub, Tabela *tabela, FILE *output_file) {
     char* saida;
     switch (curr) {
         case 1:
@@ -143,9 +143,11 @@ void verifica_estado(int curr, char *sub, Tabela *tabela, FILE *output_file) {
             break;
         case 2:
             fprintf(output_file, "%s, identificador\n", sub);
+            saida = "identificador";
             break;
         case 3:
             fprintf(output_file, "%s, numero\n", sub);
+            saida = "numero";
             break;
         case 4:
             fprintf(output_file, "Token %s igual\n", sub);
@@ -157,16 +159,17 @@ void verifica_estado(int curr, char *sub, Tabela *tabela, FILE *output_file) {
         case 9:
         case 10:
         case 11:
-        case 12:
             saida = verifica_tabela_reservados(tabela, sub);
             fprintf(output_file, "%s, %s\n", sub, saida);
             break;
         case -1:
+            saida = "ERRO_LEXICO";
             fprintf(output_file, "%s, ERRO LEXICO \n", sub);
             break;
     }
+    return saida;
 }
-void analisador_lexico(char* string, Tabela* tabela, FILE *output_file){
+char *analisador_lexico(char* string, Tabela* tabela, FILE *output_file){
     int i =0;
     int j =0;
     char c = string[i++];
@@ -182,7 +185,7 @@ void analisador_lexico(char* string, Tabela* tabela, FILE *output_file){
             sub[i-j] = '\0';
             verifica_estado(curr, sub, tabela, output_file);
             j = i;
-            state =0;
+            state = 0;
             curr = 0;
         }
         else{
@@ -190,7 +193,7 @@ void analisador_lexico(char* string, Tabela* tabela, FILE *output_file){
             c = string[i++];
         }
     }
-    strncpy(sub, string +j, i - j);
+    strncpy(sub, string + j, i - j);
     sub[i-j] = '\0';
-    verifica_estado(curr, sub, tabela, output_file);
+    return verifica_estado(curr, sub, tabela, output_file);
 }

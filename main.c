@@ -34,11 +34,13 @@ int main(int argc, char *argv[]) {
     constroi_tabela_reservada(&TabelaReservada);
 
     char * parameter;
+    int linha_atual = 0;
 
     while(fgets(buffer, sizeof(buffer), input_file)){
+        linha_atual++;
         parameter = strtok(buffer, DELIMITADOR);
         while(parameter != NULL){
-            analisador_lexico(parameter, &TabelaReservada, output_file);
+            printf("TOKEN: %s", analisador_lexico(parameter, &TabelaReservada, output_file));
             parameter = strtok(NULL,DELIMITADOR);
         }
     }
