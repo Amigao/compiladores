@@ -5,6 +5,7 @@
 
 #include "analisador_lexico.h"
 #include "hashing.h"
+#include "errors_management.h"
 
 #define TAMANHO_MAXIMO_BUFFER 100
 
@@ -45,6 +46,8 @@ int main(int argc, char *argv[]) {
     int number_of_lines = 0;
     lexico tok;
     tok.line =0;
+
+    error errosDoLexico;
     while((c = fgetc(file)) != EOF){
         tok = analisador_lexico(c, buffer, &TabelaReservada, current_state); 
         if (tok.state == END_BUFFER) {
