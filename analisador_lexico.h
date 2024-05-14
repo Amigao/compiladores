@@ -4,7 +4,7 @@
 #include "hashing.h"
 
 #define INITIAL_STATE 0 
-#define CHANGED_STATE 100
+#define END_BUFFER 100
 #define ERRO_LEXICO 20
 
 void constroi_tabela_reservada(Tabela *tabela);

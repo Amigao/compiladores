@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     int i = 0; 
     while((c = fgetc(file)) != EOF){
         new_state = analisador_lexico(c, buffer, &TabelaReservada, current_state); 
-        if (new_state == CHANGED_STATE) {
+        if (new_state == END_BUFFER) {
             ungetc(c, file);
             current_state = 0; 
             i = 0;

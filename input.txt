@@ -1,6 +1,6 @@
 VAR michel123,b,c;
 BEGIN
     a:=0;
-    b:=3;
+    b:=3x;
     c:=@+b;
 END.
