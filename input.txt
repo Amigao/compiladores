@@ -1,4 +1,4 @@
-VAR a,b,c;
+VAR michel123,b,c;
 BEGIN
     a:=0;
     b:=3;

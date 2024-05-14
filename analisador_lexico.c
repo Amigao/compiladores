@@ -36,32 +36,42 @@ int isdelimiter(char c){
 
 
 int transicao(int state, char c){
-    // Estado 3 (Apenas dígitos são aceitos)
+    // estado 3 (Apenas dígitos são aceitos)
     if (state == 3 && isdigit(c)) {
         return state;
     }
-    // Outros estados
-    if (isdigit(c)) {
-        return 3;
+    if (state == 2 && isdigit(c)){
+        return state;
     }
-    if (islower(c)) {
-        return 2;
-    }
+    // palavras reservadas 
     if (isupper(c)) {
         return 1;
     }
+    // identificadores
+    if (islower(c)) {
+        return 2;
+    } 
+    // números
+    if (isdigit(c)) {
+        return 3;
+    }
+    // espaço - descartado na lógica principal
     if (isspace(c)) {
         return 4;
     }
+    // delimitador 
     if (isdelimiter(c)) {
         return 5;
     }
+    // primeiro caractere de um operador com dois caracteres
     if (is_first_double_operator(c)) {
         return 6;
     }
+    // segundo caractere de um operador com dois caracteres
     if (is_second_double_operator(c)) {
         return 7;
     }
+    // operador com um caractere
     if (is_single_operator(c)) {
         return 8;
     }
