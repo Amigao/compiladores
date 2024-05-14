@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     lexico tok;
     tok.line =0;
 
-    error errosDoLexico;
+   // errors errosDoLexico;
     while((c = fgetc(file)) != EOF){
         tok = analisador_lexico(c, buffer, &TabelaReservada, current_state); 
         if (tok.state == END_BUFFER) {
