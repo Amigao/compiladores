@@ -83,28 +83,17 @@ int buffer_is_symbol(int state){
     return 0;
 }
 
-int transicao(int state, char c) {
+int transition(int state, char c) {
     switch (state) {
         case 0:
-            if (isupper(c)) return 1;  // palavras reservadas
-            if (islower(c)) return 2;  // identificadores
-            if (isdigit(c)) return 3;  // números
-            if (isdelimiter(c)) return 5;  // delimitador
-            if (is_first_double_operator(c)) return 6;  // primeiro caractere de um operador com dois caracteres
-            if (is_single_operator(c)) return 8;  // operador com um caractere
+            if (isupper(c) || islower(c)) return 1;  // letras maiúsculas e minúsculas vão para o estado 1
+            if (isdigit(c)) return 2;  // números
+            if (isdelimiter(c)) return 3;  // delimitadores
+            if (is_first_double_operator(c)) return 4;  // primeiro caractere de um operador duplo
+            if (is_single_operator(c)) return 5;  // operador com um caractere
             break;
         case 1:
-            if (islower(c)) return 2;  // transita para identificadores se letra minúscula for lida
-            else return 1;
-            break;
-        case 2:
-            if (isdigit(c)) return 2;  // identificadores com números continuam no estado 2
-            break;
-        case 3:
-            if (isalpha(c)) return -1;  // erro se letra após número no estado 3
-            break;
-        case 6:
-            if (is_second_double_operator(c)) return 7;  // segundo caractere de operador duplo
+            if (isupper(c) || islower(c)) return 1;  // letras maiúsculas e minúsculas continuam no estado 1
             break;
     }
     return -1;  // qualquer outra transição leva a um estado de erro
