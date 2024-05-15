@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
 
 # Lista de todos os arquivos fonte
-SRCS = main.c analisador_lexico.c hashing.c errors_management.c
+SRCS = main.c lexical_analyzer.c hashing.c errors_management.c
 
 # Lista de todos os arquivos objeto
 OBJS = $(SRCS:.c=.o)
@@ -11,7 +11,7 @@ OBJS = $(SRCS:.c=.o)
 EXEC = programa
 
 # Dependências
-DEPS = analisador_lexico.h hashing.h errors_management.h
+DEPS = lexical_analyzer.h hashing.h errors_management.h
 
 # Regra de compilação
 all: $(EXEC)

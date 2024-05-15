@@ -1,9 +1,10 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
-#include "analisador_lexico.h"
+#include "lexical_analyzer.h"
 #include "hashing.h"
 
 int is_first_double_operator(char c){
@@ -34,22 +35,13 @@ int isdelimiter(char c){
     return 0;
 }
 
-
-int transicao(int state, char c){
+int transition(int state, char c){
     if (state == 3 && isalpha(c)){
         return -1;
     }
     // identificadores com números
     if (state == 2 && isdigit(c)){
         return state;
-    }
-    // identificadores com maiusculas
-    if (state == 2 && isupper(c)){
-        return state;
-    }
-    // identificadores com primeira maiuscula 
-    if (state == 1 && islower(c)) {
-        return 2;
     }
     // palavras reservadas 
     if (isupper(c)) {
@@ -86,8 +78,8 @@ int transicao(int state, char c){
     return -1;
 }
 
-char *verifica_tabela_reservados(Tabela *tabela, char *string){
-    char *resultado = busca_tabela(tabela, string);
+char *check_reserved_table(Table *table, char *string){
+    char *resultado = search_table(table, string);
     if(isdigit(string[0])){
         return "number";
     }else if (resultado) {
@@ -97,35 +89,35 @@ char *verifica_tabela_reservados(Tabela *tabela, char *string){
     }
 }
 
-void constroi_tabela_reservada(Tabela *tabela){
-    inicializa_tabela(tabela);
-    insere_tabela(tabela, "CONST",  "<CONST>");
-    insere_tabela(tabela, "VAR", "<VAR>");
-    insere_tabela(tabela, "PROCEDURE", "<PROCEDURE>");
-    insere_tabela(tabela, "BEGIN", "<BEGIN>");
-    insere_tabela(tabela, "END", "<END>");
-    insere_tabela(tabela, "CALL", "<CALL>");
-    insere_tabela(tabela, "IF", "<IF>");
-    insere_tabela(tabela, "THEN", "<THEN>");
-    insere_tabela(tabela, "WHILE", "<WHILE>");
-    insere_tabela(tabela, "DO", "<DO>");
-    insere_tabela(tabela, "ODD", "<ODD>");
-    insere_tabela(tabela, "+", "<SIMBOLO_SOMA>");
-    insere_tabela(tabela, "-", "<SIMBOLO_SUBTRACAO>");
-    insere_tabela(tabela, "*", "<SIMBOLO_MULTIPLICACAO>");
-    insere_tabela(tabela, "/", "<SIMBOLO_DIVISAO>");
-    insere_tabela(tabela, "=", "<SIMBOLO_IGUAL>");
-    insere_tabela(tabela, "<>", "<SIMBOLO_DIFERENTE>");
-    insere_tabela(tabela, "<", "<SIMBOLO_MENOR>");
-    insere_tabela(tabela, "<=", "<SIMBOLO_MENOR_IGUAL>");
-    insere_tabela(tabela, ">", "<SIMBOLO_MAIOR>");
-    insere_tabela(tabela, ">=", "<SIMBOLO_MAIOR_IGUAL>");
-    insere_tabela(tabela, ":=", "<SIMBOLO_ATRIBUICAO>");
-    insere_tabela(tabela, "(", "<PARENTESE_ESQUERDA>");
-    insere_tabela(tabela, ")", "<PARENTESE_DIREITA>");
-    insere_tabela(tabela, ",", "<VIRGULA>");
-    insere_tabela(tabela, ";", "<PONTO_E_VIRGULA>");
-    insere_tabela(tabela, ".", "<PONTO>");
+void build_reserved_table(Table *table){
+    initialize_table(table);
+    insert_table(table, "CONST",  "<CONST>");
+    insert_table(table, "VAR", "<VAR>");
+    insert_table(table, "PROCEDURE", "<PROCEDURE>");
+    insert_table(table, "BEGIN", "<BEGIN>");
+    insert_table(table, "END", "<END>");
+    insert_table(table, "CALL", "<CALL>");
+    insert_table(table, "IF", "<IF>");
+    insert_table(table, "THEN", "<THEN>");
+    insert_table(table, "WHILE", "<WHILE>");
+    insert_table(table, "DO", "<DO>");
+    insert_table(table, "ODD", "<ODD>");
+    insert_table(table, "+", "<SIMBOLO_SOMA>");
+    insert_table(table, "-", "<SIMBOLO_SUBTRACAO>");
+    insert_table(table, "*", "<SIMBOLO_MULTIPLICACAO>");
+    insert_table(table, "/", "<SIMBOLO_DIVISAO>");
+    insert_table(table, "=", "<SIMBOLO_IGUAL>");
+    insert_table(table, "<>", "<SIMBOLO_DIFERENTE>");
+    insert_table(table, "<", "<SIMBOLO_MENOR>");
+    insert_table(table, "<=", "<SIMBOLO_MENOR_IGUAL>");
+    insert_table(table, ">", "<SIMBOLO_MAIOR>");
+    insert_table(table, ">=", "<SIMBOLO_MAIOR_IGUAL>");
+    insert_table(table, ":=", "<SIMBOLO_ATRIBUICAO>");
+    insert_table(table, "(", "<PARENTESE_ESQUERDA>");
+    insert_table(table, ")", "<PARENTESE_DIREITA>");
+    insert_table(table, ",", "<VIRGULA>");
+    insert_table(table, ";", "<PONTO_E_VIRGULA>");
+    insert_table(table, ".", "<PONTO>");
 }
 
 int is_final_state(int state){
@@ -149,10 +141,10 @@ int buffer_is_symbol(int state){
     return 0;
 }
 
-TokenInfo analisador_lexico(char character, char *buffer, Tabela* TabelaReservada, int current_state){
+TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
     TokenInfo tok;
     tok.final = false;
-    int new_state = transicao(current_state, character);
+    int new_state = transition(current_state, character);
     if (new_state == -1){
         tok.token = buffer;
         tok.identifier = "ERRO LEXICO";
@@ -162,13 +154,12 @@ TokenInfo analisador_lexico(char character, char *buffer, Tabela* TabelaReservad
         tok.token[length + 1] = '\0';
         return tok;
     }
-    //printf("new_state = %d | current_state = %d | character = %c \n", new_state, current_state, character);
     // se mudou de estado e não é um estado final 
     if (is_final_state(current_state) && changed_state(current_state, new_state)){
         // se não é espaço 
         if (!isspace(buffer[0])){
             tok.token = buffer;
-            tok.identifier = verifica_tabela_reservados(TabelaReservada,buffer);
+            tok.identifier = check_reserved_table(reservedTable,buffer);
             tok.final = true;
         }
         tok.state = END_BUFFER;
@@ -177,5 +168,6 @@ TokenInfo analisador_lexico(char character, char *buffer, Tabela* TabelaReservad
     tok.token = buffer;
     tok.identifier = NULL;
     tok.state = new_state;
+    
     return tok;
 }

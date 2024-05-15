@@ -1,5 +1,5 @@
-#ifndef ANALISADOR_LEXICO_H
-#define ANALISADOR_LEXICO_H
+#ifndef LEXICAL_ANALYZER_H 
+#define LEXICAL_ANALYZER_H
 
 #include "hashing.h"
 
@@ -14,8 +14,8 @@ typedef struct TokenInfo {
     bool final;
 } TokenInfo;
 
-void constroi_tabela_reservada(Tabela *tabela);
+void build_reserved_table(Table *table);
 
-TokenInfo analisador_lexico(char character, char* buffer, Tabela *TabelaReservada, int current_state);
+TokenInfo lexical_analyzer(char character, char* buffer, Table *reservedTable, int current_state);
     
 #endif
