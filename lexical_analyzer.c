@@ -83,36 +83,21 @@ int buffer_is_symbol(int state){
     return 0;
 }
 
-int transicao(int state, char c) {
-    switch (state) {
-        case 0:
-            if (isupper(c)) return 1;  // palavras reservadas
-            if (islower(c)) return 2;  // identificadores
-            if (isdigit(c)) return 3;  // números
-            if (isdelimiter(c)) return 5;  // delimitador
-            if (is_first_double_operator(c)) return 6;  // primeiro caractere de um operador com dois caracteres
-            if (is_single_operator(c)) return 8;  // operador com um caractere
-            break;
-        case 1:
-            if (islower(c)) return 2;  // transita para identificadores se letra minúscula for lida
-            else return 1;
-            break;
-        case 2:
-            if (isdigit(c)) return 2;  // identificadores com números continuam no estado 2
-            break;
-        case 3:
-            if (isalpha(c)) return -1;  // erro se letra após número no estado 3
-            break;
-        case 6:
-            if (is_second_double_operator(c)) return 7;  // segundo caractere de operador duplo
-            break;
-    }
-    return -1;  // qualquer outra transição leva a um estado de erro
+int transition(int state, char c){
+    if (state == 3 && isalpha(c)) return -1;
+    if (state == 1 && isalnum(c)) return state; 
+    if (isalpha(c)) return 1;
+    if (isdigit(c)) return 3;
+    if (isspace(c)) return 4;
+    if (isdelimiter(c)) return 5;
+    if (is_first_double_operator(c)) return 6;
+    if (is_second_double_operator(c)) return 7;
+    if (is_single_operator(c)) return 8;
+    return -1;
 }
 
-
 int is_final_state(int state){
-    if (state == 0 || state == 5){
+    if (state == 0 || state == 6){
         return 0;
     } 
     return 1;
@@ -138,7 +123,6 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         tok.token[length + 1] = '\0';
         return tok;
     }
-    // se mudou de estado e não é um estado final 
     if (is_final_state(current_state) && changed_state(current_state, new_state)){
         // se não é espaço 
         if (!isspace(buffer[0])){

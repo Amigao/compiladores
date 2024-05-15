@@ -1,0 +1,23 @@
+VAR, <VAR>
+MicHel123, ident
+,, <VIRGULA>
+b, ident
+,, <VIRGULA>
+c, ident
+;, <PONTO_E_VIRGULA>
+BEGIN, <BEGIN>
+a, ident
+:=, <SIMBOLO_ATRIBUICAO>
+0, number
+;, <PONTO_E_VIRGULA>
+b, ident
+:=, <SIMBOLO_ATRIBUICAO>
+3x, ERRO LEXICO
+;, <PONTO_E_VIRGULA>
+c, ident
+:=@, ERRO LEXICO
++, <SIMBOLO_SOMA>
+b, ident
+;, <PONTO_E_VIRGULA>
+END, <END>
+., <PONTO>
