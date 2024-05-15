@@ -7,12 +7,12 @@
 #include "errors_management.h"
 #include "hashing.h"
 
-#define TAMANHO_MAXIMO_BUFFER 100
+#define MAX_BUF_SIZE 100
 
 int isSymbol(char c){
-    char simbolos_especiais[12] = "+-*/()=<>:;.";
-    for (size_t j = 0; j < strlen(simbolos_especiais); j++) {
-        if (c == simbolos_especiais[j]) {
+    char special_symbols[12] = "+-*/()=<>:;.";
+    for (size_t j = 0; j < strlen(special_symbols); j++) {
+        if (c == special_symbols[j]) {
             return 1; 
         }
     }
@@ -33,8 +33,8 @@ int main(int argc, char *argv[]) {
     }
     
     // Constroi tabela reservada
-    Tabela TabelaReservada;
-    constroi_tabela_reservada(&TabelaReservada);
+    Table reservedTable;
+    build_reserved_table(&reservedTable);
    
     // Constroi lista de erros
     ErrorInfo *error_list = NULL;
@@ -42,14 +42,14 @@ int main(int argc, char *argv[]) {
     int current_state = 0;
 //    int new_state;
     char c;
-    char buffer[TAMANHO_MAXIMO_BUFFER];
+    char buffer[MAX_BUF_SIZE];
     // leitura até fim do arquivo PL/0 
     int i = 0;
     int number_of_lines = 0;
     TokenInfo tok;
     tok.line =0;
     while((c = fgetc(input_file)) != EOF){
-        tok = analisador_lexico(c, buffer, &TabelaReservada, current_state); 
+        tok = lexical_analyzer(c, buffer, &reservedTable, current_state); 
         if (tok.state == END_BUFFER) {
             ungetc(c, input_file);
             if (c == '\n'){
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
     printErrors(error_list);
     free_error_list(error_list);
-    liberar_tabela(&TabelaReservada);
+    free_table(&reservedTable);
 
     fclose(input_file);
     fclose(output_file);

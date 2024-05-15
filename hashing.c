@@ -27,13 +27,13 @@ int hash_function(char *word) {
         hash |= word[1] << 8;
     }
 
-    return hash % TAMANHO_TABELA;
+    return hash % TABLE_SIZE;
 }
 
-// Função para inicializar a tabela de hash
-void inicializa_tabela(Tabela *tabela) {
-    for (int i = 0; i < TAMANHO_TABELA; i++) {
-        tabela->table[i] = NULL;
+// Função para inicializar a table de hash
+void initialize_table(Table *table) {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        table->table[i] = NULL;
     }
 }
 
@@ -48,7 +48,7 @@ char *my_strdup(const char *src) {
     return dst;
 }
 
-void insere_tabela(Tabela *tabela, char *word, char *token){
+void insert_table(Table *table, char *word, char *token){
     int index = hash_function(word);
 
     Node *new_node = malloc(sizeof(Node));
@@ -62,10 +62,10 @@ void insere_tabela(Tabela *tabela, char *word, char *token){
 
     new_node->next = NULL;
 
-    if(tabela->table[index] == NULL){
-        tabela->table[index] = new_node;
+    if(table->table[index] == NULL){
+        table->table[index] = new_node;
     } else {
-        Node *current = tabela->table[index];
+        Node *current = table->table[index];
         while(current->next != NULL){
             current = current->next;
         }
@@ -74,10 +74,10 @@ void insere_tabela(Tabela *tabela, char *word, char *token){
 }
 
 // Função de busca
-char *busca_tabela(Tabela *tabela, char *word){
+char *search_table(Table *table, char *word){
     int index = hash_function(word);
 
-    Node *current = tabela->table[index];
+    Node *current = table->table[index];
     while (current != NULL) {
         if (strcmp(current->word, word) == 0) {
             return current->token; //Encontrado
@@ -87,9 +87,9 @@ char *busca_tabela(Tabela *tabela, char *word){
     return NULL; //Não encontrado
 }
 
-void liberar_tabela(Tabela *tabela) {
-    for (int i = 0; i < TAMANHO_TABELA; i++){
-        Node *current = tabela->table[i];
+void free_table(Table *table) {
+    for (int i = 0; i < TABLE_SIZE; i++){
+        Node *current = table->table[i];
         while (current != NULL) {
             Node *temp = current;
             current = current->next;
