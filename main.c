@@ -77,6 +77,7 @@ int main(int argc, char *argv[]) {
 
     printErrors(error_list);
     free_error_list(error_list);
+    liberar_tabela(&TabelaReservada);
 
     // printf("number of lines = %d\n", number_of_lines);
     fclose(input_file);
