@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "analisador_lexico.h"
+#include "lexical_analyzer.h"
 #include "hashing.h"
 
 int is_first_double_operator(char c){
@@ -34,7 +34,7 @@ int isdelimiter(char c){
     return 0;
 }
 
-int transicao(int state, char c){
+int transition(int state, char c){
     if (state == 3 && isalpha(c)){
         return -1;
     }
@@ -143,7 +143,7 @@ int buffer_is_symbol(int state){
 TokenInfo analisador_lexico(char character, char *buffer, Tabela* TabelaReservada, int current_state){
     TokenInfo tok;
     tok.final = false;
-    int new_state = transicao (current_state, character);
+    int new_state = transition(current_state, character);
     if (new_state == -1){
         tok.token = buffer;
         tok.identifier = "ERRO LEXICO";
@@ -167,5 +167,5 @@ TokenInfo analisador_lexico(char character, char *buffer, Tabela* TabelaReservad
     tok.token = buffer;
     tok.identifier = NULL;
     tok.state = new_state;
-    return tok;
+        return tok;
 }

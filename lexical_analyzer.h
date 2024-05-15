@@ -1,5 +1,5 @@
-#ifndef ANALISADOR_LEXICO_H
-#define ANALISADOR_LEXICO_H
+#ifndef LEXICAL_ANALYZER_H 
+#define LEXICAL_ANALYZER_H
 
 #include "hashing.h"
 
