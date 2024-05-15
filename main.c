@@ -9,7 +9,6 @@
 
 #define TAMANHO_MAXIMO_BUFFER 100
 
-
 int isSymbol(char c){
     char simbolos_especiais[12] = "+-*/()=<>:;.";
     for (size_t j = 0; j < strlen(simbolos_especiais); j++) {
@@ -79,8 +78,8 @@ int main(int argc, char *argv[]) {
     free_error_list(error_list);
     liberar_tabela(&TabelaReservada);
 
-    // printf("number of lines = %d\n", number_of_lines);
     fclose(input_file);
     fclose(output_file);
+
     return 0;
 }

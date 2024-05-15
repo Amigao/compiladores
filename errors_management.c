@@ -5,7 +5,6 @@
 #include "errors_management.h"
 #include "hashing.h"
 
-
 // Função para criar um novo nó da lista ligada
 ErrorInfo *create_error_node(char *word, int line, int type) {
     ErrorInfo *new_node = malloc(sizeof(ErrorInfo));

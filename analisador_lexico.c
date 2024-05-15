@@ -6,8 +6,6 @@
 #include "analisador_lexico.h"
 #include "hashing.h"
 
-
-
 int is_first_double_operator(char c){
     if (c == ':' || c == '!' || c == '<' || c == '>'){
         return 1;
@@ -36,12 +34,10 @@ int isdelimiter(char c){
     return 0;
 }
 
-
 int transicao(int state, char c){
     if (state == 3 && isalpha(c)){
         return -1;
     }
-
     // identificadores com números
     if (state == 2 && isdigit(c)){
         return state;
@@ -91,23 +87,6 @@ char *verifica_tabela_reservados(Tabela *tabela, char *string){
         return "ident";
     }
 }
-
-// char *verifica_tabela_simbolos(char *string){
-//     if (!strcmp(string, ";")){
-//        return "simbolo_ponto_virgula"; 
-//     } else if (!strcmp(string, ",")){
-//         return "simbolo_virgula";
-//     } else if (!strcmp(string, ":=")){
-//         return "simbolo_atribuicao";
-//     } else if (!strcmp(string, "+")){
-//         return "simbolo_mais";
-//     } else if (!strcmp(string, ".")){
-//         return "simbolo_ponto";
-//     }
-//     else {
-//         return "ERRO_LEXICO";
-//     } 
-// }
 
 void constroi_tabela_reservada(Tabela *tabela){
     inicializa_tabela(tabela);
@@ -174,7 +153,6 @@ TokenInfo analisador_lexico(char character, char *buffer, Tabela* TabelaReservad
         tok.token[length + 1] = '\0';
         return tok;
     }
-    //printf("new_state = %d | current_state = %d | character = %c \n", new_state, current_state, character);
     // se mudou de estado e não é um estado final 
     if (is_final_state(current_state) && changed_state(current_state, new_state)){
         // se não é espaço 
