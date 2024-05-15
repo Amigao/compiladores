@@ -76,6 +76,7 @@ int main(int argc, char *argv[]) {
     }
 
     printErrors(error_list);
+    
     free_error_list(error_list);
     liberar_tabela(&TabelaReservada);
 

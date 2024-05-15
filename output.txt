@@ -1,5 +1,6 @@
 VAR, <VAR>
-michel123, ident
+M, ident
+icHel123, ident
 ,, <VIRGULA>
 b, ident
 ,, <VIRGULA>
