@@ -26,17 +26,20 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    FILE *file = fopen(argv[1], "r");
-    if (file == NULL) {
+    FILE *input_file = fopen(argv[1], "r");
+    FILE *output_file = fopen("output.txt", "w");
+    if (output_file == NULL || input_file == NULL) {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
     }
-
     
     // Constroi tabela reservada
     Tabela TabelaReservada;
     constroi_tabela_reservada(&TabelaReservada);
    
+    // Constroi lista de erros
+    ErrorInfo *error_list = NULL;
+
     int current_state = 0;
 //    int new_state;
     char c;
@@ -44,12 +47,12 @@ int main(int argc, char *argv[]) {
     // leitura até fim do arquivo PL/0 
     int i = 0;
     int number_of_lines = 0;
-    lexico tok;
+    TokenInfo tok;
     tok.line =0;
-    while((c = fgetc(file)) != EOF){
+    while((c = fgetc(input_file)) != EOF){
         tok = analisador_lexico(c, buffer, &TabelaReservada, current_state); 
         if (tok.state == END_BUFFER) {
-            ungetc(c, file);
+            ungetc(c, input_file);
             if (c == '\n'){
                 number_of_lines++;
                 tok.line ++;
@@ -57,11 +60,11 @@ int main(int argc, char *argv[]) {
             current_state = 0; 
             i = 0;
             if(tok.final){
-                printf("%s, %s\n",tok.token, tok.identficador);
+                fprintf(output_file, "%s, %s\n",tok.token, tok.identifier);
             }
         } else if (tok.state == -1){
-     //       printf("ERRO_LEXICO\n");
-            printf("%s, %s\n", tok.token, "Erro");
+            fprintf(output_file, "%s, %s\n",tok.token, tok.identifier);
+            insert_error(&error_list, tok.token, number_of_lines + 1, ERRO_LEXICO);
             current_state = 0;
             i = 0;
         } else {
@@ -71,7 +74,12 @@ int main(int argc, char *argv[]) {
             i++;
         }
     }
-    printf("number of lines = %d\n", number_of_lines);
-    fclose(file);
+
+    printErrors(error_list);
+    free_error_list(error_list);
+
+    // printf("number of lines = %d\n", number_of_lines);
+    fclose(input_file);
+    fclose(output_file);
     return 0;
 }

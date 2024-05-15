@@ -17,14 +17,6 @@ typedef struct {
     Node *table[TAMANHO_TABELA];
 } Tabela;
 
-typedef struct lexico{
-    char *token;
-    char *identficador;
-    int state;
-    int line;
-    bool final;
-}lexico;
-
 int hash_function(char *word);
 
 void inicializa_tabela(Tabela *tabela);
@@ -34,5 +26,7 @@ void insere_tabela(Tabela *tabela, char *word, char *token);
 char *busca_tabela(Tabela *tabela, char *word);
 
 void liberar_tabela(Tabela *tabela);
+
+char *my_strdup(const char *src);
 
 #endif

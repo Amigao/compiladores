@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "hashing.h": "c"
+        "hashing.h": "c",
+        "errors_management.h": "c"
     }
 }

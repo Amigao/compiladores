@@ -5,9 +5,17 @@
 
 #define INITIAL_STATE 0 
 #define END_BUFFER 100
-#define ERRO_LEXICO 20
+
+typedef struct TokenInfo {
+    char *token;
+    char *identifier;  
+    int state;
+    int line;
+    bool final;
+} TokenInfo;
 
 void constroi_tabela_reservada(Tabela *tabela);
-lexico analisador_lexico(char character, char* buffer, Tabela *TabelaReservada, int current_state);
+
+TokenInfo analisador_lexico(char character, char* buffer, Tabela *TabelaReservada, int current_state);
     
 #endif

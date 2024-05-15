@@ -92,22 +92,22 @@ char *verifica_tabela_reservados(Tabela *tabela, char *string){
     }
 }
 
-char *verifica_tabela_simbolos(char *string){
-    if (!strcmp(string, ";")){
-       return "simbolo_ponto_virgula"; 
-    } else if (!strcmp(string, ",")){
-        return "simbolo_virgula";
-    } else if (!strcmp(string, ":=")){
-        return "simbolo_atribuicao";
-    } else if (!strcmp(string, "+")){
-        return "simbolo_mais";
-    } else if (!strcmp(string, ".")){
-        return "simbolo_ponto";
-    }
-    else {
-        return "ERRO_LEXICO";
-    } 
-}
+// char *verifica_tabela_simbolos(char *string){
+//     if (!strcmp(string, ";")){
+//        return "simbolo_ponto_virgula"; 
+//     } else if (!strcmp(string, ",")){
+//         return "simbolo_virgula";
+//     } else if (!strcmp(string, ":=")){
+//         return "simbolo_atribuicao";
+//     } else if (!strcmp(string, "+")){
+//         return "simbolo_mais";
+//     } else if (!strcmp(string, ".")){
+//         return "simbolo_ponto";
+//     }
+//     else {
+//         return "ERRO_LEXICO";
+//     } 
+// }
 
 void constroi_tabela_reservada(Tabela *tabela){
     inicializa_tabela(tabela);
@@ -161,13 +161,13 @@ int buffer_is_symbol(int state){
     return 0;
 }
 
-lexico analisador_lexico(char character, char *buffer, Tabela* TabelaReservada, int current_state){
-    lexico tok;
+TokenInfo analisador_lexico(char character, char *buffer, Tabela* TabelaReservada, int current_state){
+    TokenInfo tok;
     tok.final = false;
     int new_state = transicao (current_state, character);
     if (new_state == -1){
         tok.token = buffer;
-        tok.identficador = "Erro";
+        tok.identifier = "ERRO LEXICO";
         tok.state = new_state;
         int length = strlen(tok.token);
         tok.token[length] = character;
@@ -180,14 +180,14 @@ lexico analisador_lexico(char character, char *buffer, Tabela* TabelaReservada, 
         // se não é espaço 
         if (!isspace(buffer[0])){
             tok.token = buffer;
-            tok.identficador = verifica_tabela_reservados(TabelaReservada,buffer);
+            tok.identifier = verifica_tabela_reservados(TabelaReservada,buffer);
             tok.final = true;
         }
         tok.state = END_BUFFER;
         return tok;
     }
     tok.token = buffer;
-    tok.identficador = NULL;
+    tok.identifier = NULL;
     tok.state = new_state;
     return tok;
 }

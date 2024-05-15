@@ -3,39 +3,30 @@
 #include <string.h>
 
 #include "errors_management.h"
+#include "hashing.h"
 
-char *my_strdup(const char *src) {
-    size_t len = strlen(src) + 1; // +1 para o caractere nulo
-    char *dst = malloc(len);
-    if (dst == NULL) {
-        fprintf(stderr, "Erro ao alocar memória para duplicar a string.");
-        exit(EXIT_FAILURE);
-    }
-    strcpy(dst, src);
-    return dst;
-}
 
 // Função para criar um novo nó da lista ligada
-Errors *create_errors(char *word, char *token, int line) {
-    Errors *new_node = malloc(sizeof(Errors));
+ErrorInfo *create_error_node(char *word, int line, int type) {
+    ErrorInfo *new_node = malloc(sizeof(ErrorInfo));
     if (new_node == NULL) {
         fprintf(stderr, "Erro ao alocar memória para o novo nó.\n");
         exit(EXIT_FAILURE);
     }
     new_node->word = my_strdup(word);
-    new_node->token = my_strdup(token);
     new_node->line = line;
+    new_node->type = type;
     new_node->next = NULL;
     return new_node;
 }
 
 // Função para inserir uma palavra no final da lista ligada
-void insert_error(Errors **head, char *word, char *token, int line) {
-    Errors *new_node = create_node(word, token, line);
+void insert_error(ErrorInfo **head, char *word, int line, int type) {
+    ErrorInfo *new_node = create_error_node(word, line, type);
     if (*head == NULL) {
         *head = new_node;
     } else {
-        Errors *current = *head;
+        ErrorInfo *current = *head;
         while (current->next != NULL) {
             current = current->next;
         }
@@ -44,12 +35,21 @@ void insert_error(Errors **head, char *word, char *token, int line) {
 }
 
 // Função para liberar a memória alocada para a lista ligada
-void free_error_list(Errors *head) {
-    Errors *current = head;
+void free_error_list(ErrorInfo *head) {
+    ErrorInfo *current = head;
     while (current != NULL) {
-        Errors *temp = current;
+        ErrorInfo *temp = current;
         current = current->next;
         free(temp->word);
         free(temp);
+    }
+}
+
+// Função para liberar a memória alocada para a lista ligada
+void printErrors(ErrorInfo *head) {
+    ErrorInfo *current = head;
+    while (current != NULL) {
+        if (current->type == ERRO_LEXICO) printf("ERRO: erro LEXICO encontrado na linha %d. Termo \"%s\" mal formado.\n", current->line, current->word);
+        current = current->next;        
     }
 }
