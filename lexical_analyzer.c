@@ -7,77 +7,6 @@
 #include "lexical_analyzer.h"
 #include "hashing.h"
 
-int is_first_double_operator(char c){
-    if (c == ':' || c == '!' || c == '<' || c == '>'){
-        return 1;
-    }
-    return 0;
-}
-
-int is_second_double_operator(char c){
-    if (c == '=' || c == '!' || c == '<' || c == '>'){
-        return 1;
-    }
-    return 0;
-}
-
-int is_single_operator(char c){
-    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/'){
-        return 1; 
-    }
-    return 0;
-}
-
-int isdelimiter(char c){
-    if (c == ',' || c == ';' || c == '.'){
-        return 1;
-    }
-    return 0;
-}
-
-int transition(int state, char c){
-    if (state == 3 && isalpha(c)){
-        return -1;
-    }
-    // identificadores com números
-    if (state == 2 && isdigit(c)){
-        return state;
-    }
-    // palavras reservadas 
-    if (isupper(c)) {
-        return 1;
-    }
-    // identificadores
-    if (islower(c)) {
-        return 2;
-    } 
-    // números
-    if (isdigit(c)) {
-        return 3;
-    }
-    // espaço - descartado na lógica principal
-    if (isspace(c)) {
-        return 4;
-    }
-    // delimitador 
-    if (isdelimiter(c)) {
-        return 5;
-    }
-    // primeiro caractere de um operador com dois caracteres
-    if (is_first_double_operator(c)) {
-        return 6;
-    }
-    // segundo caractere de um operador com dois caracteres
-    if (is_second_double_operator(c)) {
-        return 7;
-    }
-    // operador com um caractere
-    if (is_single_operator(c)) {
-        return 8;
-    }
-    return -1;
-}
-
 char *check_reserved_table(Table *table, char *string){
     char *resultado = search_table(table, string);
     if(isdigit(string[0])){
@@ -119,9 +48,71 @@ void build_reserved_table(Table *table){
     insert_table(table, ";", "<PONTO_E_VIRGULA>");
     insert_table(table, ".", "<PONTO>");
 }
+int is_first_double_operator(char c){
+    if (c == ':' || c == '!' || c == '<' || c == '>'){
+        return 1;
+    }
+    return 0;
+}
+
+int is_second_double_operator(char c){
+    if (c == '='){
+        return 1;
+    }
+    return 0;
+}
+
+int is_single_operator(char c){
+    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/'){
+        return 1; 
+    }
+    return 0;
+}
+
+int isdelimiter(char c){
+    if (c == ',' || c == ';' || c == '.'){
+        return 1;
+    }
+    return 0;
+}
+
+int buffer_is_symbol(int state){
+    if (state == 4 || state == 5 || state == 6 || state == 7){
+        return 1;
+    }
+    return 0;
+}
+
+int transicao(int state, char c) {
+    switch (state) {
+        case 0:
+            if (isupper(c)) return 1;  // palavras reservadas
+            if (islower(c)) return 2;  // identificadores
+            if (isdigit(c)) return 3;  // números
+            if (isdelimiter(c)) return 5;  // delimitador
+            if (is_first_double_operator(c)) return 6;  // primeiro caractere de um operador com dois caracteres
+            if (is_single_operator(c)) return 8;  // operador com um caractere
+            break;
+        case 1:
+            if (islower(c)) return 2;  // transita para identificadores se letra minúscula for lida
+            else return 1;
+            break;
+        case 2:
+            if (isdigit(c)) return 2;  // identificadores com números continuam no estado 2
+            break;
+        case 3:
+            if (isalpha(c)) return -1;  // erro se letra após número no estado 3
+            break;
+        case 6:
+            if (is_second_double_operator(c)) return 7;  // segundo caractere de operador duplo
+            break;
+    }
+    return -1;  // qualquer outra transição leva a um estado de erro
+}
+
 
 int is_final_state(int state){
-    if (state == 0 || state == 6){
+    if (state == 0 || state == 5){
         return 0;
     } 
     return 1;
@@ -129,13 +120,6 @@ int is_final_state(int state){
 
 int changed_state(int state_a, int state_b){
     if (state_a != state_b){
-        return 1;
-    }
-    return 0;
-}
-
-int buffer_is_symbol(int state){
-    if (state == 5 || state == 6 || state == 7 || state == 8){
         return 1;
     }
     return 0;
