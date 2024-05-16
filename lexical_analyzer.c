@@ -103,11 +103,10 @@ int transition(int state, char c) {
         // Se entrar no estado de comentario, continua ate achar o simbolo de encerrar comentario
         case 10:
             if(c == '}') return 11;
-            return 10;
+            else return 10;
             break;
-        case 11:
-            break;
-        
+
+
         // Estado de erro
         case -1:
             if(is_valid_symbol(c)) return 7;
