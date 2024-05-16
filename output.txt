@@ -12,15 +12,16 @@ a, ident
 ;, <PONTO_E_VIRGULA>
 b, ident
 :=, <SIMBOLO_ATRIBUICAO>
-3x, ERRO LEXICO
+3x, ident
 ;, <PONTO_E_VIRGULA>
+DASDADS, ident
 c, ident
 :=, <SIMBOLO_ATRIBUICAO>
-@, ERRO LEXICO
+@, ident
 +, <SIMBOLO_SOMA>
 b, ident
 ;, <PONTO_E_VIRGULA>
-dlaspdla&, ERRO LEXICO
+dlaspdla&, ident
 spd, ident
 ;, <PONTO_E_VIRGULA>
 END, <END>

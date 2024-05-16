@@ -69,7 +69,7 @@ bool is_delimiter(char c) {
 }
 
 bool is_valid_symbol(char c) {
-    return (is_second_double_operator(c) || is_first_double_operator(c) || is_single_operator(c) || is_delimiter(c));
+    return (is_second_double_operator(c) || is_first_double_operator(c) || is_single_operator(c) || is_delimiter(c) || c == '{');
 }
 
 
@@ -110,7 +110,9 @@ int transition(int state, char c) {
             break;
         case 11:
             break;
-
+        case -1:
+            if(is_valid_symbol(c)) return 7;
+            break;
     }
     return -1;  // qualquer outra transição leva a um estado de erro
 }
@@ -130,19 +132,19 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
     // Faz a transicao no automato baseado no caracter de entrada
     int new_state = transition(current_state, character);
     // Estado de erro
-    if (new_state == -1){
-        tok.token = buffer;
-        int length = strlen(tok.token);
-        tok.token[length] = character;
-        tok.token[length + 1] = '\0';
+    // if (new_state == -1){
+    //     tok.token = buffer;
+    //     int length = strlen(tok.token);
+    //     tok.token[length] = character;
+    //     tok.token[length + 1] = '\0';
 
-        tok.state = new_state;
-        tok.identifier = my_strdup("ERRO LEXICO");
-        return tok;
-    }
+    //     tok.state = new_state;
+    //     tok.identifier = my_strdup("ERRO LEXICO");
+    //     return tok;
+    // }
 
     // Representa o estado "outro" no automato
-    else if (new_state == 7){
+    if (new_state == 7){
         tok.token = buffer;
         int length = strlen(tok.token);
         tok.token[length] = '\0';
