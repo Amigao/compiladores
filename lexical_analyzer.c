@@ -84,20 +84,20 @@ int buffer_is_symbol(int state){
 }
 
 int transition(int state, char c){
-    if (state == 3 && isalpha(c)) return -1;
-    if (state == 1 && isalnum(c)) return state; 
-    if (isalpha(c)) return 1;
-    if (isdigit(c)) return 3;
-    if (isspace(c)) return 4;
-    if (isdelimiter(c)) return 5;
-    if (is_first_double_operator(c)) return 6;
-    if (is_second_double_operator(c)) return 7;
-    if (is_single_operator(c)) return 8;
-    return -1;
+    if (state == DIGIT && isalpha(c)) return ERROR;
+    if (state == ALPHA && isalnum(c)) return state; 
+    if (isalpha(c)) return ALPHA;
+    if (isdigit(c)) return DIGIT;
+    if (isspace(c)) return SPACE;
+    if (isdelimiter(c)) return DELIMITER;
+    if (is_first_double_operator(c)) return FIRST_DOUBLE_OP;
+    if (is_second_double_operator(c)) return SECOND_DOUBLE_OP;
+    if (is_single_operator(c)) return SINGLE_OP;
+    return ERROR;
 }
 
 int is_final_state(int state){
-    if (state == 0 || state == 6){
+    if (state == 0 || state == 5){
         return 0;
     } 
     return 1;

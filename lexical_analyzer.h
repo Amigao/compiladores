@@ -14,6 +14,17 @@ typedef struct TokenInfo {
     bool final;
 } TokenInfo;
 
+enum STATE {
+    ERROR = -1,
+    ALPHA = 1,
+    DIGIT,
+    SPACE,
+    DELIMITER,
+    FIRST_DOUBLE_OP,
+    SECOND_DOUBLE_OP,
+    SINGLE_OP
+};
+
 void build_reserved_table(Table *table);
 
 TokenInfo lexical_analyzer(char character, char* buffer, Table *reservedTable, int current_state);
