@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,83 +7,12 @@
 #include "lexical_analyzer.h"
 #include "hashing.h"
 
-int is_first_double_operator(char c){
-    if (c == ':' || c == '!' || c == '<' || c == '>'){
-        return 1;
-    }
-    return 0;
-}
-
-int is_second_double_operator(char c){
-    if (c == '=' || c == '!' || c == '<' || c == '>'){
-        return 1;
-    }
-    return 0;
-}
-
-int is_single_operator(char c){
-    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/'){
-        return 1; 
-    }
-    return 0;
-}
-
-int isdelimiter(char c){
-    if (c == ',' || c == ';' || c == '.'){
-        return 1;
-    }
-    return 0;
-}
-
-int transition(int state, char c){
-    if (state == 3 && isalpha(c)){
-        return -1;
-    }
-    // identificadores com números
-    if (state == 2 && isdigit(c)){
-        return state;
-    }
-    // palavras reservadas 
-    if (isupper(c)) {
-        return 1;
-    }
-    // identificadores
-    if (islower(c)) {
-        return 2;
-    } 
-    // números
-    if (isdigit(c)) {
-        return 3;
-    }
-    // espaço - descartado na lógica principal
-    if (isspace(c)) {
-        return 4;
-    }
-    // delimitador 
-    if (isdelimiter(c)) {
-        return 5;
-    }
-    // primeiro caractere de um operador com dois caracteres
-    if (is_first_double_operator(c)) {
-        return 6;
-    }
-    // segundo caractere de um operador com dois caracteres
-    if (is_second_double_operator(c)) {
-        return 7;
-    }
-    // operador com um caractere
-    if (is_single_operator(c)) {
-        return 8;
-    }
-    return -1;
-}
-
 char *check_reserved_table(Table *table, char *string){
-    char *resultado = search_table(table, string);
-    if(isdigit(string[0])){
+    char *result = search_table(table, string);
+    if (isdigit(string[0])){
         return "number";
-    }else if (resultado) {
-        return resultado;
+    } else if (result) {
+        return result;
     } else {
         return "ident";
     }
@@ -118,26 +48,60 @@ void build_reserved_table(Table *table){
     insert_table(table, ";", "<PONTO_E_VIRGULA>");
     insert_table(table, ".", "<PONTO>");
 }
-
-int is_final_state(int state){
-    if (state == 0 || state == 6){
-        return 0;
-    } 
-    return 1;
+int is_first_double_operator(char c){
+    if (c == ':' || c == '!' || c == '<' || c == '>'){
+        return 1;
+    }
+    return 0;
 }
 
-int changed_state(int state_a, int state_b){
-    if (state_a != state_b){
+int is_second_double_operator(char c){
+    if (c == '='){
+        return 1;
+    }
+    return 0;
+}
+
+int is_single_operator(char c){
+    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/'){
+        return 1; 
+    }
+    return 0;
+}
+
+int isdelimiter(char c){
+    if (c == ',' || c == ';' || c == '.'){
         return 1;
     }
     return 0;
 }
 
 int buffer_is_symbol(int state){
-    if (state == 5 || state == 6 || state == 7 || state == 8){
+    if (state == 4 || state == 5 || state == 6 || state == 7){
         return 1;
     }
     return 0;
+}
+
+int transition(int state, char c){
+    if (state == DIGIT && isalpha(c)) return ERROR;
+    if (state == ALPHA && isalnum(c)) return state; 
+    if (isalpha(c)) return ALPHA;
+    if (isdigit(c)) return DIGIT;
+    if (isspace(c)) return SPACE;
+    if (isdelimiter(c)) return DELIMITER;
+    if (is_first_double_operator(c)) return FIRST_DOUBLE_OP;
+    if (is_second_double_operator(c)) return SECOND_DOUBLE_OP;
+    if (is_single_operator(c)) return SINGLE_OP;
+    return ERROR;
+}
+
+int is_final_state(int state){
+    return (state == 0 || state == 5) ? 0 : 1;
+}
+
+int changed_state(int state_a, int state_b){
+    return (state_a != state_b) ? 1 : 0;
 }
 
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
@@ -153,7 +117,6 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         tok.token[length + 1] = '\0';
         return tok;
     }
-    // se mudou de estado e não é um estado final 
     if (is_final_state(current_state) && changed_state(current_state, new_state)){
         // se não é espaço 
         if (!isspace(buffer[0])){

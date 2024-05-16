@@ -9,16 +9,6 @@
 
 #define MAX_BUF_SIZE 100
 
-int isSymbol(char c){
-    char special_symbols[12] = "+-*/()=<>:;.";
-    for (size_t j = 0; j < strlen(special_symbols); j++) {
-        if (c == special_symbols[j]) {
-            return 1; 
-        }
-    }
-    return 0;
-}
-
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Uso: %s <arquivo>\n", argv[0]);
@@ -40,10 +30,8 @@ int main(int argc, char *argv[]) {
     ErrorInfo *error_list = NULL;
 
     int current_state = 0;
-//    int new_state;
     char c;
     char buffer[MAX_BUF_SIZE];
-    // leitura até fim do arquivo PL/0 
     int i = 0;
     int number_of_lines = 0;
     TokenInfo tok;
@@ -56,15 +44,15 @@ int main(int argc, char *argv[]) {
                 number_of_lines++;
                 tok.line ++;
             }
-            current_state = 0; 
+            current_state = INITIAL_STATE; 
             i = 0;
             if(tok.final){
                 fprintf(output_file, "%s, %s\n",tok.token, tok.identifier);
             }
-        } else if (tok.state == -1){
+        } else if (tok.state == ERROR){
             fprintf(output_file, "%s, %s\n",tok.token, tok.identifier);
             insert_error(&error_list, tok.token, number_of_lines + 1, ERRO_LEXICO);
-            current_state = 0;
+            current_state = INITIAL_STATE;
             i = 0;
         } else {
             buffer[i] = c;
@@ -75,6 +63,7 @@ int main(int argc, char *argv[]) {
     }
 
     printErrors(error_list);
+    
     free_error_list(error_list);
     free_table(&reservedTable);
 
