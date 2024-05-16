@@ -3,7 +3,6 @@
 
 #include "hashing.h"
 
-#define INITIAL_STATE 0 
 #define END_BUFFER 100
 
 typedef struct TokenInfo {
@@ -16,7 +15,8 @@ typedef struct TokenInfo {
 
 enum STATE {
     ERROR = -1,
-    ALPHA = 1,
+    INITIAL_STATE = 0, 
+    ALPHA,
     DIGIT,
     SPACE,
     DELIMITER,
