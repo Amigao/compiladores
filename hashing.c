@@ -5,26 +5,25 @@
 #include "hashing.h"
 
 
-// Função de hash -> valores ASCII das primeiras duas letras da palavra e duas ultimas letras da palavra
 int hash_function(char *word) {
     int hash = 0;
-    if(strlen(word) > 2){
-        //Duas primeiras letras
+    int len = strlen(word);
+
+    if(len > 2) {
+        // Duas primeiras letras
         hash |= word[0];
         hash |= word[1] << 8;
 
-        //Duas últimas letras
-        int len = strlen(word);
+        // Duas últimas letras
         hash |= word[len - 2] << 16;
         hash |= word[len - 1] << 24;
-    }    // Caso de strings de tamanho unitário ou de dois caracteres
-    if(strlen(word) == 1) {
-        // Apenas um caractere
-        hash |= word[0];
-    } else {
+    } else if(len == 2) {
         // Dois caracteres
         hash |= word[0];
         hash |= word[1] << 8;
+    } else if(len == 1) {
+        // Apenas um caractere
+        hash |= word[0];
     }
 
     return hash % TABLE_SIZE;
