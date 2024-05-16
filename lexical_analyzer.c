@@ -8,9 +8,6 @@
 #include "hashing.h"
 
 char *check_reserved_table(Table *table, char *string){
-    if (isdigit(string[0])){
-        return "number";
-    }
     char *result = search_table(table, string);
     if (result != NULL) {
         return result;
@@ -49,47 +46,30 @@ void build_reserved_table(Table *table){
     insert_table(table, ";", "<PONTO_E_VIRGULA>");
     insert_table(table, ".", "<PONTO>");
 }
-int is_first_double_operator(char c){
-    if (c == ':' || c == '!' || c == '<' || c == '>'){
-        return 1;
-    }
-    return 0;
+
+#include <stdbool.h> // Incluindo a biblioteca para usar o tipo de dado booleano
+
+bool is_first_double_operator(char c) {
+    return (c == ':' || c == '!' || c == '<' || c == '>');
 }
 
-int is_second_double_operator(char c){
-    if (c == '='){
-        return 1;
-    }
-    return 0;
+bool is_second_double_operator(char c) {
+    return (c == '=');
 }
 
-int is_single_operator(char c){
-    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/'){
-        return 1; 
-    }
-    return 0;
+bool is_single_operator(char c) {
+    return (c == '=' || c == '+' || c == '-' || c == '*' || c == '/');
 }
 
-int is_valid_symbol(char c){
-    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/' || c == ',' || c == ';' || c == '.' || c == ':' || c == '!' || c == '<' || c == '>'){
-        return 1; 
-    }
-    return 0;
+bool is_delimiter(char c) {
+    return (c == ',' || c == ';' || c == '.');
 }
 
-int isdelimiter(char c){
-    if (c == ',' || c == ';' || c == '.'){
-        return 1;
-    }
-    return 0;
+bool is_valid_symbol(char c) {
+    return (is_second_double_operator(c) || is_first_double_operator(c) || is_single_operator(c) || is_delimiter(c));
 }
 
-int buffer_is_symbol(int state){
-    if (state == 3 || state == 5 || state == 6 || state == 7){
-        return 1;
-    }
-    return 0;
-}
+
 
 int transition(int state, char c) {
 
@@ -97,43 +77,43 @@ int transition(int state, char c) {
         case 0:
             if (isalpha(c)) return 1;  // letras maiúsculas e minúsculas vão para o estado 1
             if (isdigit(c)) return 2;  // números
-            if (isdelimiter(c)) return 3;  // delimitadores
-            if (is_first_double_operator(c)) return 4;  // primeiro caractere de um operador duplo
+            if (is_first_double_operator(c)) return 3;  // primeiro caractere de um operador duplo
+            if (is_delimiter(c)) return 4;  // delimitadores
             if (is_single_operator(c)) return 5;  // operador com um caractere
+            if (c == '#') return 10;  // comentario
             break;
         case 1:
-            if (isupper(c) || islower(c) || isdigit(c)) return 1;  // letras maiúsculas e minúsculas continuam no estado 1
-            if (is_valid_symbol(c)) return 6;
+            if (isalpha(c) || isdigit(c)) return 1;  // letras maiúsculas e minúsculas continuam no estado 1
+            if (is_valid_symbol(c)) return 7;
             break;
         case 2:
             if (isalpha(c)) return -1;
             if (isdigit(c)) return 2;
-            if (is_valid_symbol(c)) return 6;
+            if (is_valid_symbol(c)) return 7;
             break;
         case 3:
-            if(isalpha(c) || isdigit(c)) return 6;
-            break;
-        case 4:
             if(is_second_double_operator(c)) return 5;
             else return 6;
             break;
+        case 4:
         case 5:
-            if(isalpha(c) || isdigit(c)) return 6;
-            break;
-        case 7:
-            if(isalpha(c) || isdigit(c)) return 6;
+        case 6:
+            if(isalpha(c) || isdigit(c)) return 7;
             break;  
+        case 10:
+            return 10;
+            break;
+
     }
     return -1;  // qualquer outra transição leva a um estado de erro
 }
 
-
-int is_final_state(int state){
-    return (state == 0 || state == 4) ? 0 : 1;
+bool is_final_state(int state){
+    return !(state == 0 || state == 3);
 }
 
-int changed_state(int state_a, int state_b){
-    return (state_a != state_b) ? 1 : 0;
+bool changed_state(int state_a, int state_b){
+    return (state_a != state_b);
 }
 
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
@@ -145,28 +125,34 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         int length = strlen(tok.token);
         tok.token[length] = character;
         tok.token[length + 1] = '\0';
+
         tok.state = new_state;
-        tok.identifier = "ERRO LEXICO";
+        tok.identifier = my_strdup("ERRO LEXICO");
         return tok;
     }
 
-    else if (new_state == 6){
+    else if (new_state == 7){
         tok.token = buffer;
         int length = strlen(tok.token);
         tok.token[length] = '\0';
-        tok.identifier = check_reserved_table(reservedTable,tok.token);
+
+        if (current_state == 2) tok.identifier = my_strdup("number");
+        else tok.identifier = check_reserved_table(reservedTable,tok.token);
+
         tok.final = true;
         tok.state = END_BUFFER;
         return tok;
     }
 
     else if (is_final_state(new_state)){
-        tok.state = new_state;
         tok.token = buffer;
         int length = strlen(tok.token);
         tok.token[length] = character;
         tok.token[length + 1] = '\0';
-        tok.identifier = check_reserved_table(reservedTable,tok.token);
+
+        tok.state = new_state;
+        if (tok.state == 2) tok.identifier = my_strdup("number");
+        else tok.identifier = check_reserved_table(reservedTable,tok.token);
         tok.final = true;
         return tok;
     }

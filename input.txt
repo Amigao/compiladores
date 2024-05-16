@@ -3,4 +3,5 @@ BEGIN
     a:=0;
     b:=3x;
     c:=@+b;
+    dlaspdla&spd;
 END.
