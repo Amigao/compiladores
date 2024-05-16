@@ -132,6 +132,7 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
     // Faz a transicao no automato baseado no caracter de entrada
     int new_state = transition(current_state, character);
 
+
     // Representa o estado de retroceder no automato
     if (new_state == RETURN_STATE){
         tok.token = buffer;
@@ -145,25 +146,25 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
 
         // retorna que chegou ao final do buffer
         tok.final = true;
+        tok.state = RETURN_STATE;
         // retorna o par token/classe
         return tok;
     }
 
     //se esta em um possivel estado final
-    if (is_final_state(new_state)){
+    else if (is_final_state(new_state)){
         tok.token = buffer;
         int length = strlen(tok.token);
         tok.token[length] = character;
         tok.token[length + 1] = '\0';
-        tok.state = new_state;
 
+        tok.state = new_state;
         // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
         if (current_state == 2) tok.identifier = my_strdup("number");
         else if (current_state == -1) tok.identifier = my_strdup("ERRO LEXICO");
         else tok.identifier = check_reserved_table(reservedTable,tok.token);
         tok.final = true;
         // retorna o par token/classe
-
         return tok;
     }
 
