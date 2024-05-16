@@ -4,6 +4,7 @@
 #include "hashing.h"
 
 #define RETURN_STATE 7
+#define INITIAL_STATE 7
 
 typedef struct TokenInfo {
     char *token;
@@ -11,18 +12,6 @@ typedef struct TokenInfo {
     int state;
     bool final;
 } TokenInfo;
-
-enum STATE {
-    ERROR = -1,
-    INITIAL_STATE = 0, 
-    ALPHA,
-    DIGIT,
-    SPACE,
-    DELIMITER,
-    FIRST_DOUBLE_OP,
-    SECOND_DOUBLE_OP,
-    SINGLE_OP
-};
 
 void build_reserved_table(Table *table);
 
