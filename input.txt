@@ -2,6 +2,8 @@ VAR MicHel123,b,c;
 BEGIN
     a:=0;
     b:=3x;
+    {primeiro comen}
+    { comentario }
     c:=@+b;
     dlaspdla&spd;
 END.

@@ -7,6 +7,7 @@
 #include "lexical_analyzer.h"
 #include "hashing.h"
 
+// Funcao para checar se o buffer esta na tabela de palavras e simbolos reservados
 char *check_reserved_table(Table *table, char *string){
     char *result = search_table(table, string);
     if (result != NULL) {
@@ -16,6 +17,7 @@ char *check_reserved_table(Table *table, char *string){
     }
 }
 
+// Adiciona palavras e simbolos reservados na tabela
 void build_reserved_table(Table *table){
     initialize_table(table);
     insert_table(table, "CONST",  "<CONST>");
@@ -49,6 +51,7 @@ void build_reserved_table(Table *table){
 
 #include <stdbool.h> // Incluindo a biblioteca para usar o tipo de dado booleano
 
+/* Funcoes auxiliares para conferir o estado do automato */
 bool is_first_double_operator(char c) {
     return (c == ':' || c == '!' || c == '<' || c == '>');
 }
@@ -71,6 +74,7 @@ bool is_valid_symbol(char c) {
 
 
 
+// Funcao de transicao de estados do automato
 int transition(int state, char c) {
 
     switch (state) {
@@ -80,7 +84,7 @@ int transition(int state, char c) {
             if (is_first_double_operator(c)) return 3;  // primeiro caractere de um operador duplo
             if (is_delimiter(c)) return 4;  // delimitadores
             if (is_single_operator(c)) return 6;  // operador com um caractere
-            if (c == '#') return 10;  // comentario
+            if (c == '{') return 10;  // comentario
             break;
         case 1:
             if (isalpha(c) || isdigit(c)) return 1;  // letras maiúsculas e minúsculas continuam no estado 1
@@ -100,8 +104,11 @@ int transition(int state, char c) {
         case 6:
             return 7;
             break;  
-        case 10:
+        case 10:// Se entrar no estado de comentario, continua ate achar o simbolo de encerrar comentario
+            if(c == '}') return 11;
             return 10;
+            break;
+        case 11:
             break;
 
     }
@@ -109,17 +116,20 @@ int transition(int state, char c) {
 }
 
 bool is_final_state(int state){
-    return !(state == 0 || state == 3);
+    return !(state == 0 || state == 3 || state == 11);
 }
 
 bool changed_state(int state_a, int state_b){
     return (state_a != state_b);
 }
 
+// Funcao que sera chamada pelo sintatico
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
     TokenInfo tok;
     tok.final = false;
+    // Faz a transicao no automato baseado no caracter de entrada
     int new_state = transition(current_state, character);
+    // Estado de erro
     if (new_state == -1){
         tok.token = buffer;
         int length = strlen(tok.token);
@@ -131,19 +141,24 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         return tok;
     }
 
+    // Representa o estado "outro" no automato
     else if (new_state == 7){
         tok.token = buffer;
         int length = strlen(tok.token);
         tok.token[length] = '\0';
 
+        // Confere se eh um numero ou se esta na tabela de palavras e simbolos reservados
         if (current_state == 2) tok.identifier = my_strdup("number");
         else tok.identifier = check_reserved_table(reservedTable,tok.token);
 
+        // retorna que chegou ao final do buffer
         tok.final = true;
         tok.state = END_BUFFER;
+        // retorna o par token/classe
         return tok;
     }
 
+    //se esta em um possivel estado final
     else if (is_final_state(new_state)){
         tok.token = buffer;
         int length = strlen(tok.token);
@@ -151,9 +166,11 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         tok.token[length + 1] = '\0';
 
         tok.state = new_state;
+        // Confere se eh um numero ou se esta na tabela de palavras e simbolos reservados
         if (tok.state == 2) tok.identifier = my_strdup("number");
         else tok.identifier = check_reserved_table(reservedTable,tok.token);
         tok.final = true;
+        // retorna o par token/classe
         return tok;
     }
 
