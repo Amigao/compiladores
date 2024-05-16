@@ -30,41 +30,44 @@ int hash_function(char *word) {
     return hash % TABLE_SIZE;
 }
 
-// Função para inicializar a table de hash
+// Função para inicializar a tabela hash
 void initialize_table(Table *table) {
     for (int i = 0; i < TABLE_SIZE; i++) {
-        table->table[i] = NULL;
+        table->table[i] = NULL; // Inicializa cada entrada da tabela como NULL
     }
 }
 
+// Função para duplicar uma string
 char *my_strdup(const char *src) {
-    size_t len = strlen(src) + 1; // +1 para o caractere nulo
-    char *dst = malloc(len);
+    size_t len = strlen(src) + 1; // Calcula o tamanho da string de origem
+    char *dst = malloc(len); // Aloca memória para a nova string
     if (dst == NULL) {
-        fprintf(stderr, "Erro ao alocar memória para duplicar a string.");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Erro ao alocar memória para duplicar a string."); // Mensagem de erro se a alocação falhar
+        exit(EXIT_FAILURE); // Sai do programa com falha
     }
-    strcpy(dst, src);
-    return dst;
+    strcpy(dst, src); // Copia o conteúdo da string de origem para a nova string
+    return dst; // Retorna um ponteiro para a nova string duplicada
 }
 
+// Função para inserir um par palavra-token na tabela hash
 void insert_table(Table *table, char *word, char *token){
-    int index = hash_function(word);
+    int index = hash_function(word); // Calcula o índice usando a função de hash
 
-    Node *new_node = malloc(sizeof(Node));
-    if (new_node == NULL){
-        fprintf(stderr, "Erro ao alocar memória para nó.");
-        exit(EXIT_FAILURE);
+    Node *new_node = malloc(sizeof(Node)); // Aloca memória para um novo nó
+    if (new_node == NULL){ // Verifica se a alocação falhou
+        fprintf(stderr, "Erro ao alocar memória para nó."); // Mensagem de erro se a alocação falhar
+        exit(EXIT_FAILURE); // Sai do programa com falha
     }
 
-    new_node->word = my_strdup(word);
-    new_node->token = my_strdup(token);
+    new_node->word = my_strdup(word); // Duplica a palavra e atribui ao novo nó
+    new_node->token = my_strdup(token); // Duplica o token e atribui ao novo nó
 
-    new_node->next = NULL;
+    new_node->next = NULL; // Inicializa o ponteiro next do novo nó como NULL
 
+    // Se a posição na tabela estiver vazia, insere o novo nó nessa posição
     if(table->table[index] == NULL){
         table->table[index] = new_node;
-    } else {
+    } else { // Caso contrário, percorre a lista encadeada até o final e insere o novo nó lá
         Node *current = table->table[index];
         while(current->next != NULL){
             current = current->next;
@@ -75,26 +78,27 @@ void insert_table(Table *table, char *word, char *token){
 
 // Função de busca
 char *search_table(Table *table, char *word){
-    int index = hash_function(word);
+    int index = hash_function(word); // Calcula o índice usando a função de hash
 
-    Node *current = table->table[index];
-    while (current != NULL) {
-        if (strcmp(current->word, word) == 0) {
-            return current->token; //Encontrado
+    Node *current = table->table[index]; // Inicializa o ponteiro current com a cabeça da lista encadeada
+    while (current != NULL) { // Percorre a lista encadeada
+        if (strcmp(current->word, word) == 0) { // Compara a palavra atual com a palavra buscada
+            return current->token; // Se encontrada, retorna o token associado
         }
-        current = current->next;
+        current = current->next; // Move para o próximo nó na lista
     }
-    return NULL; //Não encontrado
+    return NULL; // Se a palavra não for encontrada, retorna NULL
 }
 
+// Função para liberar a memória alocada para a tabela hash e seus nós
 void free_table(Table *table) {
-    for (int i = 0; i < TABLE_SIZE; i++){
-        Node *current = table->table[i];
-        while (current != NULL) {
-            Node *temp = current;
-            current = current->next;
-            free(temp->word);
-            free(temp);
+    for (int i = 0; i < TABLE_SIZE; i++){ // Percorre toda a tabela hash
+        Node *current = table->table[i]; // Inicializa o ponteiro current com a cabeça da lista encadeada
+        while (current != NULL) { // Percorre a lista encadeada
+            Node *temp = current; // Salva o nó atual em temp
+            current = current->next; // Move para o próximo nó na lista
+            free(temp->word); // Libera a memória da palavra do nó atual
+            free(temp); // Libera a memória do nó atual
         }        
     }
 }

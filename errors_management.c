@@ -46,9 +46,11 @@ void free_error_list(ErrorInfo *head) {
 
 // Função para liberar a memória alocada para a lista ligada
 void printErrors(ErrorInfo *head) {
+    printf("\n\n");
     ErrorInfo *current = head;
     while (current != NULL) {
         if (current->type == ERRO_LEXICO) printf("ERRO: erro LEXICO encontrado na linha %d. Termo \"%s\" mal formado.\n", current->line, current->word);
         current = current->next;        
     }
+    printf("\n\n");
 }

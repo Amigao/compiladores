@@ -7,17 +7,17 @@
 #include "lexical_analyzer.h"
 #include "hashing.h"
 
+// Funcao para checar se o buffer esta na tabela de palavras e simbolos reservados
 char *check_reserved_table(Table *table, char *string){
     char *result = search_table(table, string);
-    if (isdigit(string[0])){
-        return "number";
-    } else if (result) {
+    if (result != NULL) {
         return result;
     } else {
         return "ident";
     }
 }
 
+// Adiciona palavras e simbolos reservados na tabela
 void build_reserved_table(Table *table){
     initialize_table(table);
     insert_table(table, "CONST",  "<CONST>");
@@ -48,88 +48,136 @@ void build_reserved_table(Table *table){
     insert_table(table, ";", "<PONTO_E_VIRGULA>");
     insert_table(table, ".", "<PONTO>");
 }
-int is_first_double_operator(char c){
-    if (c == ':' || c == '!' || c == '<' || c == '>'){
-        return 1;
+
+#include <stdbool.h> // Incluindo a biblioteca para usar o tipo de dado booleano
+
+/* Funcoes auxiliares para conferir o estado do automato */
+bool is_first_double_operator(char c) {
+    return (c == ':' || c == '!' || c == '<' || c == '>');
+}
+
+bool is_second_double_operator(char c) {
+    return (c == '=');
+}
+
+bool is_single_operator(char c) {
+    return (c == '=' || c == '+' || c == '-' || c == '*' || c == '/');
+}
+
+bool is_delimiter(char c) {
+    return (c == ',' || c == ';' || c == '.');
+}
+
+bool is_valid_symbol(char c) {
+    return (is_second_double_operator(c) || is_first_double_operator(c) || is_single_operator(c) || is_delimiter(c));
+}
+
+
+
+// Funcao de transicao de estados do automato
+int transition(int state, char c) {
+
+    switch (state) {
+        case 0:
+            if (isalpha(c)) return 1;  // letras maiúsculas e minúsculas vão para o estado 1
+            if (isdigit(c)) return 2;  // números
+            if (is_first_double_operator(c)) return 3;  // primeiro caractere de um operador duplo
+            if (is_delimiter(c)) return 4;  // delimitadores
+            if (is_single_operator(c)) return 6;  // operador com um caractere
+            if (c == '{') return 10;  // comentario
+            break;
+        case 1:
+            if (isalpha(c) || isdigit(c)) return 1;  // letras maiúsculas e minúsculas continuam no estado 1
+            if (is_valid_symbol(c)) return 7;
+            break;
+        case 2:
+            if (isalpha(c)) return -1;
+            if (isdigit(c)) return 2;
+            if (is_valid_symbol(c)) return 7;
+            break;
+        case 3:
+            if(is_second_double_operator(c)) return 5;
+            else return 7;
+            break;
+        case 4:
+        case 5:
+        case 6:
+            return 7;
+            break;  
+        case 10:// Se entrar no estado de comentario, continua ate achar o simbolo de encerrar comentario
+            if(c == '}') return 11;
+            return 10;
+            break;
+        case 11:
+            break;
+
     }
-    return 0;
+    return -1;  // qualquer outra transição leva a um estado de erro
 }
 
-int is_second_double_operator(char c){
-    if (c == '='){
-        return 1;
-    }
-    return 0;
+bool is_final_state(int state){
+    return !(state == 0 || state == 3 || state == 11);
 }
 
-int is_single_operator(char c){
-    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/'){
-        return 1; 
-    }
-    return 0;
+bool changed_state(int state_a, int state_b){
+    return (state_a != state_b);
 }
 
-int isdelimiter(char c){
-    if (c == ',' || c == ';' || c == '.'){
-        return 1;
-    }
-    return 0;
-}
-
-int buffer_is_symbol(int state){
-    if (state == 4 || state == 5 || state == 6 || state == 7){
-        return 1;
-    }
-    return 0;
-}
-
-int transition(int state, char c){
-    if (state == DIGIT && isalpha(c)) return ERROR;
-    if (state == ALPHA && isalnum(c)) return state; 
-    if (isalpha(c)) return ALPHA;
-    if (isdigit(c)) return DIGIT;
-    if (isspace(c)) return SPACE;
-    if (isdelimiter(c)) return DELIMITER;
-    if (is_first_double_operator(c)) return FIRST_DOUBLE_OP;
-    if (is_second_double_operator(c)) return SECOND_DOUBLE_OP;
-    if (is_single_operator(c)) return SINGLE_OP;
-    return ERROR;
-}
-
-int is_final_state(int state){
-    return (state == 0 || state == 5) ? 0 : 1;
-}
-
-int changed_state(int state_a, int state_b){
-    return (state_a != state_b) ? 1 : 0;
-}
-
+// Funcao que sera chamada pelo sintatico
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
     TokenInfo tok;
     tok.final = false;
+    // Faz a transicao no automato baseado no caracter de entrada
     int new_state = transition(current_state, character);
+    // Estado de erro
     if (new_state == -1){
         tok.token = buffer;
-        tok.identifier = "ERRO LEXICO";
-        tok.state = new_state;
         int length = strlen(tok.token);
         tok.token[length] = character;
         tok.token[length + 1] = '\0';
+
+        tok.state = new_state;
+        tok.identifier = my_strdup("ERRO LEXICO");
         return tok;
     }
-    if (is_final_state(current_state) && changed_state(current_state, new_state)){
-        // se não é espaço 
-        if (!isspace(buffer[0])){
-            tok.token = buffer;
-            tok.identifier = check_reserved_table(reservedTable,buffer);
-            tok.final = true;
-        }
+
+    // Representa o estado "outro" no automato
+    else if (new_state == 7){
+        tok.token = buffer;
+        int length = strlen(tok.token);
+        tok.token[length] = '\0';
+
+        // Confere se eh um numero ou se esta na tabela de palavras e simbolos reservados
+        if (current_state == 2) tok.identifier = my_strdup("number");
+        else tok.identifier = check_reserved_table(reservedTable,tok.token);
+
+        // retorna que chegou ao final do buffer
+        tok.final = true;
         tok.state = END_BUFFER;
+        // retorna o par token/classe
         return tok;
     }
+
+    //se esta em um possivel estado final
+    else if (is_final_state(new_state)){
+        tok.token = buffer;
+        int length = strlen(tok.token);
+        tok.token[length] = character;
+        tok.token[length + 1] = '\0';
+
+        tok.state = new_state;
+        // Confere se eh um numero ou se esta na tabela de palavras e simbolos reservados
+        if (tok.state == 2) tok.identifier = my_strdup("number");
+        else tok.identifier = check_reserved_table(reservedTable,tok.token);
+        tok.final = true;
+        // retorna o par token/classe
+        return tok;
+    }
+
+    // Se não é um estado final, atualiza o buffer e o estado
     tok.token = buffer;
     tok.identifier = NULL;
     tok.state = new_state;
-    
+
     return tok;
 }
