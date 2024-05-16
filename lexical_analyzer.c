@@ -8,11 +8,11 @@
 #include "hashing.h"
 
 char *check_reserved_table(Table *table, char *string){
-    char *resultado = search_table(table, string);
-    if(isdigit(string[0])){
+    char *result = search_table(table, string);
+    if (isdigit(string[0])){
         return "number";
-    }else if (resultado) {
-        return resultado;
+    } else if (result) {
+        return result;
     } else {
         return "ident";
     }
