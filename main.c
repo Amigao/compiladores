@@ -40,10 +40,8 @@ int main(int argc, char *argv[]) {
     ErrorInfo *error_list = NULL;
 
     int current_state = 0;
-//    int new_state;
     char c;
     char buffer[MAX_BUF_SIZE];
-    // leitura até fim do arquivo PL/0 
     int i = 0;
     int number_of_lines = 0;
     TokenInfo tok;
