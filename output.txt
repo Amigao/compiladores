@@ -3,26 +3,20 @@ MicHel123, ident
 ,, <VIRGULA>
 b, ident
 ,, <VIRGULA>
-c, ident
+cdsadas, ident
 ;, <PONTO_E_VIRGULA>
 BEGIN, <BEGIN>
-a, ident
-:=, <SIMBOLO_ATRIBUICAO>
-0, number
-;, <PONTO_E_VIRGULA>
 b, ident
 :=, <SIMBOLO_ATRIBUICAO>
-3x, ident
+3x, ERRO LEXICO
 ;, <PONTO_E_VIRGULA>
-DASDADS, ident
 c, ident
 :=, <SIMBOLO_ATRIBUICAO>
-@, ident
+@, ERRO LEXICO
 +, <SIMBOLO_SOMA>
 b, ident
 ;, <PONTO_E_VIRGULA>
-dlaspdla&, ident
-spd, ident
+dlaspdla&spd, ERRO LEXICO
 ;, <PONTO_E_VIRGULA>
 END, <END>
 ., <PONTO>

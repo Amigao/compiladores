@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
             number_of_lines++;
         }
 
-        // chegou no espaço ou \n indica que acabou a token
+        // chegou no espaço ou \n indica, que acabou a token
         if (isspace(c) || c == '\n') {
             if(tok.state == 10 && isspace(c)){
                 buffer[i] = c;
@@ -61,7 +61,11 @@ int main(int argc, char *argv[]) {
                 i++;
                 continue;
             }
-           if(tok.final){
+            
+            if(tok.final){
+                if (tok.state == -1){
+                    insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
+                }
                 // imprime no arquivo de saida o par token/identificador
                 fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
                 //volta para o estado incial e reseta as Variaveis
@@ -70,9 +74,12 @@ int main(int argc, char *argv[]) {
                 buffer[i] = '\0';
                 tok.final = false;
             }
-        }else{
+
+        } else {
+
             // chama o lexico para cada caracter
             tok = lexical_analyzer(c, buffer, &reservedTable, current_state);
+            
             // se entrar no estado de comentario
             if(tok.state == 11){
                 buffer[i] = c;
@@ -86,20 +93,17 @@ int main(int argc, char *argv[]) {
                 tok.final = false;
             }
             
-            // Se chegou ao final do buffer
-            else if (tok.state == END_BUFFER) {
+            // Se entrou no estado de retroceder
+            else if (tok.state == RETURN_STATE) {
+                if (current_state == -1){
+                    insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
+                }
                 //adiciona ao arquivo de saida
                 fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+                
+                // devolve o caractere pra cadeia de entrada
                 ungetc(c, input_file);
                 // reseta as variaveis
-                current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-
-            } else if (tok.state == ERROR) { // Caso tenha entrado no estado de erro
-                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
-                // insere na lista de erro e reseta as variaveis
-                insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
                 current_state = INITIAL_STATE;
                 i = 0;
                 buffer[i] = '\0';

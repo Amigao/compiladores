@@ -1,9 +1,6 @@
-VAR MicHel123,b,c{dsadas};
+VAR MicHel123,b,cdsadas;
 BEGIN
-    a:=0{dsada};
     b:=3x;
-    {primeiro comen}DASDADS
-    { comentario }
     c:=@+b;
     dlaspdla&spd;
 END.

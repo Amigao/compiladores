@@ -3,7 +3,7 @@
 
 #include "hashing.h"
 
-#define END_BUFFER 100
+#define RETURN_STATE 7
 
 typedef struct TokenInfo {
     char *token;
