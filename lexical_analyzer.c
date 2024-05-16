@@ -97,10 +97,7 @@ int transition(int state, char c){
 }
 
 int is_final_state(int state){
-    if (state == 0 || state == 5){
-        return 0;
-    } 
-    return 1;
+    return (state == 0 || state == 5) ? 0 : 1;
 }
 
 int changed_state(int state_a, int state_b){
