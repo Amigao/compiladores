@@ -56,15 +56,15 @@ int main(int argc, char *argv[]) {
                 number_of_lines++;
                 tok.line ++;
             }
-            current_state = 0; 
+            current_state = INITIAL_STATE; 
             i = 0;
             if(tok.final){
                 fprintf(output_file, "%s, %s\n",tok.token, tok.identifier);
             }
-        } else if (tok.state == -1){
+        } else if (tok.state == ERROR){
             fprintf(output_file, "%s, %s\n",tok.token, tok.identifier);
             insert_error(&error_list, tok.token, number_of_lines + 1, ERRO_LEXICO);
-            current_state = 0;
+            current_state = INITIAL_STATE;
             i = 0;
         } else {
             buffer[i] = c;
