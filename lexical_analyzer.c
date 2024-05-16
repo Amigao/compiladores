@@ -139,16 +139,14 @@ int changed_state(int state_a, int state_b){
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
     TokenInfo tok;
     tok.final = false;
-    printf("estado atual: %d\n", current_state);
     int new_state = transition(current_state, character);
-    printf("novo atual: %d\n", new_state);
     if (new_state == -1){
         tok.token = buffer;
-        tok.identifier = "ERRO LEXICO";
-        tok.state = new_state;
         int length = strlen(tok.token);
         tok.token[length] = character;
         tok.token[length + 1] = '\0';
+        tok.state = new_state;
+        tok.identifier = "ERRO LEXICO";
         return tok;
     }
 
@@ -168,7 +166,6 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         int length = strlen(tok.token);
         tok.token[length] = character;
         tok.token[length + 1] = '\0';
-        printf("token: %s\n", tok.token);
         tok.identifier = check_reserved_table(reservedTable,tok.token);
         tok.final = true;
         return tok;

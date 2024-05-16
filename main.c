@@ -36,21 +36,19 @@ int main(int argc, char *argv[]) {
     buffer[0] = '\0';
     int number_of_lines = 1; 
     TokenInfo tok;
-    tok.line = 1; 
 
     while ((c = fgetc(input_file)) != EOF) {
         if (c == '\n') {
             number_of_lines++;
-            tok.line++;
         }
 
         if (isspace(c) || c == '\n') {
             if(tok.final){
                 fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
-                printf("TOKEN FINAL E IDENTIFICADOR: %s, %s\n", tok.token, tok.identifier);
                 current_state = INITIAL_STATE;
                 i = 0;
                 buffer[i] = '\0';
+                tok.final = false;
             }
         } 
         
@@ -66,10 +64,11 @@ int main(int argc, char *argv[]) {
                 buffer[i] = '\0';
 
             } else if (tok.state == ERROR) {
+                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+                insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
                 current_state = INITIAL_STATE;
                 i = 0;
                 buffer[i] = '\0';
-                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
 
             } else {
                 buffer[i] = c;

@@ -9,7 +9,6 @@ typedef struct TokenInfo {
     char *token;
     char *identifier;  
     int state;
-    int line;
     bool final;
 } TokenInfo;
 
