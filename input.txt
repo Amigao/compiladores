@@ -4,5 +4,4 @@ BEGIN
     b:=3x;
     c:=@+b;
     dlaspdla&spd;
-    #comentario bacana do pedrao
 END.

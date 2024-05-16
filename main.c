@@ -43,20 +43,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (isspace(c) || c == '\n') {
-            if(tok.state == 10){
-                if (c == '\n'){
-                    printf("COMENTARIO IGNORADO; %s", buffer);
-                    current_state = INITIAL_STATE;
-                    i = 0;
-                    buffer[i] = '\0';
-                    tok.final = false;
-                } else {                    
-                    buffer[i] = c;
-                    buffer[i + 1] = '\0';
-                    i++;
-                }
-            }
-            else if(tok.final){
+            if(tok.final){
                 fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
                 current_state = INITIAL_STATE;
                 i = 0;
