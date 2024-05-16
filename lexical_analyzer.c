@@ -8,11 +8,11 @@
 #include "hashing.h"
 
 char *check_reserved_table(Table *table, char *string){
-    char *resultado = search_table(table, string);
-    if(isdigit(string[0])){
+    char *result = search_table(table, string);
+    if (isdigit(string[0])){
         return "number";
-    }else if (resultado) {
-        return resultado;
+    } else if (result) {
+        return result;
     } else {
         return "ident";
     }
@@ -101,17 +101,11 @@ int transition(int state, char c) {
 
 
 int is_final_state(int state){
-    if (state == 0 || state == 5){
-        return 0;
-    } 
-    return 1;
+    return (state == 0 || state == 5) ? 0 : 1;
 }
 
 int changed_state(int state_a, int state_b){
-    if (state_a != state_b){
-        return 1;
-    }
-    return 0;
+    return (state_a != state_b) ? 1 : 0;
 }
 
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
@@ -127,7 +121,6 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         tok.token[length + 1] = '\0';
         return tok;
     }
-    // se mudou de estado e não é um estado final 
     if (is_final_state(current_state) && changed_state(current_state, new_state)){
         // se não é espaço 
         if (!isspace(buffer[0])){
