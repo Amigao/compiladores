@@ -69,6 +69,13 @@ int is_single_operator(char c){
     return 0;
 }
 
+int is_valid_symbol(char c){
+    if (c == '=' || c == '+' || c == '-' || c == '*' || c == '/' || c == ',' || c == ';' || c == '.' || c == ':' || c == '!' || c == '<' || c == '>'){
+        return 1; 
+    }
+    return 0;
+}
+
 int isdelimiter(char c){
     if (c == ',' || c == ';' || c == '.'){
         return 1;
@@ -77,7 +84,7 @@ int isdelimiter(char c){
 }
 
 int buffer_is_symbol(int state){
-    if (state == 4 || state == 5 || state == 6 || state == 7){
+    if (state == 3 || state == 5 || state == 6 || state == 7){
         return 1;
     }
     return 0;
@@ -86,22 +93,41 @@ int buffer_is_symbol(int state){
 int transition(int state, char c) {
     switch (state) {
         case 0:
-            if (isupper(c) || islower(c)) return 1;  // letras maiúsculas e minúsculas vão para o estado 1
+            if (isalpha(c)) return 1;  // letras maiúsculas e minúsculas vão para o estado 1
             if (isdigit(c)) return 2;  // números
             if (isdelimiter(c)) return 3;  // delimitadores
             if (is_first_double_operator(c)) return 4;  // primeiro caractere de um operador duplo
             if (is_single_operator(c)) return 5;  // operador com um caractere
             break;
         case 1:
-            if (isupper(c) || islower(c)) return 1;  // letras maiúsculas e minúsculas continuam no estado 1
+            if (isupper(c) || islower(c) || isdigit(c)) return 1;  // letras maiúsculas e minúsculas continuam no estado 1
+            if (is_valid_symbol(c)) return 6;
             break;
+        case 2:
+            if (isalpha(c)) return -1;
+            if (isdigit(c)) return 2;
+            if (is_valid_symbol(c)) return 6;
+            break;
+        case 3:
+            if(isalpha(c) || isdigit(c)) return 6;
+            break;
+        case 4:
+            if(is_second_double_operator(c)) return 5;
+            else return 6;
+            break;
+        case 5:
+            if(isalpha(c) || isdigit(c)) return 6;
+            break;
+        case 7:
+            if(isalpha(c) || isdigit(c)) return 6;
+            break;  
     }
     return -1;  // qualquer outra transição leva a um estado de erro
 }
 
 
 int is_final_state(int state){
-    return (state == 0 || state == 5) ? 0 : 1;
+    return (state == 0 || state == 4) ? 0 : 1;
 }
 
 int changed_state(int state_a, int state_b){
@@ -112,6 +138,9 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
     TokenInfo tok;
     tok.final = false;
     int new_state = transition(current_state, character);
+    while (!isspace(character) && new_state != -1 && new_state != 6){
+        new_state = transition(current_state, character);
+    }
     if (new_state == -1){
         tok.token = buffer;
         tok.identifier = "ERRO LEXICO";
@@ -121,19 +150,20 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         tok.token[length + 1] = '\0';
         return tok;
     }
-    if (is_final_state(current_state) && changed_state(current_state, new_state)){
-        // se não é espaço 
-        if (!isspace(buffer[0])){
-            tok.token = buffer;
-            tok.identifier = check_reserved_table(reservedTable,buffer);
-            tok.final = true;
-        }
+
+    if (new_state == 6){
+        tok.token = buffer;
+        tok.identifier = check_reserved_table(reservedTable,buffer);
+        tok.final = true;
         tok.state = END_BUFFER;
-        return tok;
     }
-    tok.token = buffer;
-    tok.identifier = NULL;
-    tok.state = new_state;
+    
+    if (is_final_state(new_state)){
+        tok.token = buffer;
+        tok.identifier = check_reserved_table(reservedTable,buffer);
+        tok.final = true;
+        tok.state = new_state;
+    }
     
     return tok;
 }
