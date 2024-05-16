@@ -8,10 +8,11 @@
 #include "hashing.h"
 
 char *check_reserved_table(Table *table, char *string){
-    char *result = search_table(table, string);
     if (isdigit(string[0])){
         return "number";
-    } else if (result) {
+    }
+    char *result = search_table(table, string);
+    if (result != NULL) {
         return result;
     } else {
         return "ident";
@@ -91,6 +92,7 @@ int buffer_is_symbol(int state){
 }
 
 int transition(int state, char c) {
+
     switch (state) {
         case 0:
             if (isalpha(c)) return 1;  // letras maiúsculas e minúsculas vão para o estado 1
@@ -137,10 +139,9 @@ int changed_state(int state_a, int state_b){
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
     TokenInfo tok;
     tok.final = false;
+    printf("estado atual: %d\n", current_state);
     int new_state = transition(current_state, character);
-    while (!isspace(character) && new_state != -1 && new_state != 6){
-        new_state = transition(current_state, character);
-    }
+    printf("novo atual: %d\n", new_state);
     if (new_state == -1){
         tok.token = buffer;
         tok.identifier = "ERRO LEXICO";
@@ -151,19 +152,32 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         return tok;
     }
 
-    if (new_state == 6){
+    else if (new_state == 6){
         tok.token = buffer;
-        tok.identifier = check_reserved_table(reservedTable,buffer);
+        int length = strlen(tok.token);
+        tok.token[length] = '\0';
+        tok.identifier = check_reserved_table(reservedTable,tok.token);
         tok.final = true;
         tok.state = END_BUFFER;
+        return tok;
     }
-    
-    if (is_final_state(new_state)){
-        tok.token = buffer;
-        tok.identifier = check_reserved_table(reservedTable,buffer);
-        tok.final = true;
+
+    else if (is_final_state(new_state)){
         tok.state = new_state;
+        tok.token = buffer;
+        int length = strlen(tok.token);
+        tok.token[length] = character;
+        tok.token[length + 1] = '\0';
+        printf("token: %s\n", tok.token);
+        tok.identifier = check_reserved_table(reservedTable,tok.token);
+        tok.final = true;
+        return tok;
     }
-    
+
+    // Se não é um estado final, atualiza o buffer e o estado
+    tok.token = buffer;
+    tok.identifier = NULL;
+    tok.state = new_state;
+
     return tok;
 }

@@ -29,36 +29,54 @@ int main(int argc, char *argv[]) {
     // Constroi lista de erros
     ErrorInfo *error_list = NULL;
 
-    int current_state = 0;
+    int current_state = INITIAL_STATE;
     char c;
     char buffer[MAX_BUF_SIZE];
     int i = 0;
-    int number_of_lines = 0;
+    buffer[0] = '\0';
+    int number_of_lines = 1; 
     TokenInfo tok;
-    tok.line =0;
-    while((c = fgetc(input_file)) != EOF){
-        tok = lexical_analyzer(c, buffer, &reservedTable, current_state); 
-        if (tok.state == END_BUFFER) {
-            ungetc(c, input_file);
-            if (c == '\n'){
-                number_of_lines++;
-                tok.line ++;
-            }
-            current_state = INITIAL_STATE; 
-            i = 0;
+    tok.line = 1; 
+
+    while ((c = fgetc(input_file)) != EOF) {
+        if (c == '\n') {
+            number_of_lines++;
+            tok.line++;
+        }
+
+        if (isspace(c) || c == '\n') {
             if(tok.final){
-                fprintf(output_file, "%s, %s\n",tok.token, tok.identifier);
+                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+                printf("TOKEN FINAL E IDENTIFICADOR: %s, %s\n", tok.token, tok.identifier);
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
             }
-        } else if (tok.state == ERROR){
-            fprintf(output_file, "%s, %s\n",tok.token, tok.identifier);
-            insert_error(&error_list, tok.token, number_of_lines + 1, ERRO_LEXICO);
-            current_state = INITIAL_STATE;
-            i = 0;
-        } else {
-            buffer[i] = c;
-            buffer[i+1] = '\0';
-            current_state = tok.state;
-            i++;
+        } 
+        
+        else {
+            
+            tok = lexical_analyzer(c, buffer, &reservedTable, current_state);
+
+            if (tok.state == END_BUFFER) {
+                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+                ungetc(c, input_file);
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
+
+            } else if (tok.state == ERROR) {
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
+                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+
+            } else {
+                buffer[i] = c;
+                buffer[i + 1] = '\0';
+                current_state = tok.state;
+                i++;
+            }
         }
     }
 
