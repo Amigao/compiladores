@@ -4,7 +4,7 @@
 #include "hashing.h"
 
 #define RETURN_STATE 7
-#define INITIAL_STATE 7
+#define INITIAL_STATE 0
 
 typedef struct TokenInfo {
     char *token;
