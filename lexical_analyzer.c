@@ -7,7 +7,7 @@
 #include "lexical_analyzer.h"
 #include "hashing.h"
 
-// Funcao para checar se o buffer esta na tabela de palavras e simbolos reservados
+// Funcao para checar se o token esta na tabela de palavras e simbolos reservados
 char *check_reserved_table(Table *table, char *string){
     char *result = search_table(table, string);
     if (result != NULL) {
@@ -49,9 +49,7 @@ void build_reserved_table(Table *table){
     insert_table(table, ".", "<PONTO>");
 }
 
-#include <stdbool.h> // Incluindo a biblioteca para usar o tipo de dado booleano
-
-/* Funcoes auxiliares para conferir o estado do automato */
+// Funcoes auxiliares para conferir o estado do automato 
 bool is_first_double_operator(char c) {
     return (c == ':' || c == '!' || c == '<' || c == '>');
 }
@@ -71,8 +69,6 @@ bool is_delimiter(char c) {
 bool is_valid_symbol(char c) {
     return (is_second_double_operator(c) || is_first_double_operator(c) || is_single_operator(c) || is_delimiter(c) || c == '{');
 }
-
-
 
 // Funcao de transicao de estados do automato
 int transition(int state, char c) {
@@ -104,12 +100,16 @@ int transition(int state, char c) {
         case 6:
             return 7;
             break;  
-        case 10:// Se entrar no estado de comentario, continua ate achar o simbolo de encerrar comentario
+
+        // Se entrar no estado de comentario, continua ate achar o simbolo de encerrar comentario
+        case 10:
             if(c == '}') return 11;
             return 10;
             break;
         case 11:
             break;
+        
+        // Estado de erro
         case -1:
             if(is_valid_symbol(c)) return 7;
             break;
@@ -121,57 +121,36 @@ bool is_final_state(int state){
     return !(state == 0 || state == 3 || state == 11);
 }
 
-bool changed_state(int state_a, int state_b){
-    return (state_a != state_b);
-}
-
 // Funcao que sera chamada pelo sintatico
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
     TokenInfo tok;
     tok.final = false;
+
     // Faz a transicao no automato baseado no caracter de entrada
     int new_state = transition(current_state, character);
-
-
-    // Representa o estado de retroceder no automato
-    if (new_state == RETURN_STATE){
-        tok.token = buffer;
-        int length = strlen(tok.token);
-        tok.token[length] = '\0';
-
-        // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
-        if (current_state == 2) tok.identifier = my_strdup("number");
-        else if (current_state == -1) tok.identifier = my_strdup("ERRO LEXICO");
-        else tok.identifier = check_reserved_table(reservedTable,tok.token);
-
-        // retorna que chegou ao final do buffer
-        tok.final = true;
-        tok.state = RETURN_STATE;
-        // retorna o par token/classe
-        return tok;
-    }
+    tok.state = new_state;
+    tok.token = buffer;
 
     //se esta em um possivel estado final
-    else if (is_final_state(new_state)){
-        tok.token = buffer;
-        int length = strlen(tok.token);
-        tok.token[length] = character;
-        tok.token[length + 1] = '\0';
+    if (is_final_state(new_state)){
 
-        tok.state = new_state;
+        int length = strlen(tok.token);
+        if(new_state == RETURN_STATE){ // se for estado de retroceder, não adiciona o caracter da cadeia no token lido
+            tok.token[length] = '\0';
+        } else {
+            tok.token[length] = character;
+            tok.token[length + 1] = '\0';
+        }
+
+        tok.final = true;
+        
         // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
         if (current_state == 2) tok.identifier = my_strdup("number");
         else if (current_state == -1) tok.identifier = my_strdup("ERRO LEXICO");
         else tok.identifier = check_reserved_table(reservedTable,tok.token);
-        tok.final = true;
-        // retorna o par token/classe
-        return tok;
+        
     }
 
-    // Se não é um estado final, atualiza o buffer e o estado
-    tok.token = buffer;
-    tok.identifier = NULL;
-    tok.state = new_state;
-
+    // retorna o par token/classe
     return tok;
 }
