@@ -79,7 +79,7 @@ int transition(int state, char c) {
             if (isdigit(c)) return 2;  // números
             if (is_first_double_operator(c)) return 3;  // primeiro caractere de um operador duplo
             if (is_delimiter(c)) return 4;  // delimitadores
-            if (is_single_operator(c)) return 5;  // operador com um caractere
+            if (is_single_operator(c)) return 6;  // operador com um caractere
             if (c == '#') return 10;  // comentario
             break;
         case 1:
@@ -93,12 +93,12 @@ int transition(int state, char c) {
             break;
         case 3:
             if(is_second_double_operator(c)) return 5;
-            else return 6;
+            else return 7;
             break;
         case 4:
         case 5:
         case 6:
-            if(isalpha(c) || isdigit(c)) return 7;
+            return 7;
             break;  
         case 10:
             return 10;

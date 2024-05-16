@@ -15,7 +15,8 @@ b, ident
 3x, ERRO LEXICO
 ;, <PONTO_E_VIRGULA>
 c, ident
-:=@, ERRO LEXICO
+:=, <SIMBOLO_ATRIBUICAO>
+@, ERRO LEXICO
 +, <SIMBOLO_SOMA>
 b, ident
 ;, <PONTO_E_VIRGULA>
