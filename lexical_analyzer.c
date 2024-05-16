@@ -104,10 +104,7 @@ int is_final_state(int state){
 }
 
 int changed_state(int state_a, int state_b){
-    if (state_a != state_b){
-        return 1;
-    }
-    return 0;
+    return (state_a != state_b) ? 1 : 0;
 }
 
 TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){

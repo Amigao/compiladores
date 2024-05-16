@@ -9,16 +9,6 @@
 
 #define MAX_BUF_SIZE 100
 
-int isSymbol(char c){
-    char special_symbols[12] = "+-*/()=<>:;.";
-    for (size_t j = 0; j < strlen(special_symbols); j++) {
-        if (c == special_symbols[j]) {
-            return 1; 
-        }
-    }
-    return 0;
-}
-
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Uso: %s <arquivo>\n", argv[0]);
