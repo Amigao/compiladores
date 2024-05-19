@@ -33,4 +33,8 @@ else
 endif
 
 clean:
-	rm -f $(EXEC) $(OBJS)	
+ifeq ($(OS),Windows_NT)
+	del /F /Q $(EXEC) $(OBJS)
+else
+	rm -f $(EXEC) $(OBJS)
+endif
