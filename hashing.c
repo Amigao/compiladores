@@ -92,6 +92,7 @@ void free_table(Table *table) {
             Node *temp = current; 
             current = current->next; 
             free(temp->word); 
+            free(temp->token); 
             free(temp); 
         }        
     }
