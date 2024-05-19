@@ -27,7 +27,7 @@ $(EXEC): $(OBJS)
 # Regra para executar o programa, aceitando um arquivo de entrada e usando input.txt caso não haja entrada do usuario
 run: $(EXEC)
 ifeq ($(ARGS),)
-	./$(EXEC) input.txt
+	./$(EXEC) 
 else
 	./$(EXEC) $(ARGS)
 endif
@@ -36,5 +36,5 @@ clean:
 ifeq ($(OS),Windows_NT)
 	del /F /Q $(EXEC) $(OBJS)
 else
-	rm -f $(EXEC) $(OBJS)
+	rm -f $(EXEC) $(OBJS) output.txt
 endif
