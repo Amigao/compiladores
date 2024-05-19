@@ -1,14 +1,14 @@
 VAR, <VAR>
-Pedro, ident
+MicHel123, ident
 ,, <VIRGULA>
-cdsa%das, ERRO LEXICO
+b, ident
+,, <VIRGULA>
+cdsadas, ident
 ;, <PONTO_E_VIRGULA>
 BEGIN, <BEGIN>
 b, ident
 :=, <SIMBOLO_ATRIBUICAO>
-3, number
-+, <SIMBOLO_SOMA>
-6, number
+3x, ERRO LEXICO
 ;, <PONTO_E_VIRGULA>
 c, ident
 :=, <SIMBOLO_ATRIBUICAO>
@@ -16,5 +16,5 @@ c, ident
 +, <SIMBOLO_SOMA>
 b, ident
 ;, <PONTO_E_VIRGULA>
-END, <END>
-., <PONTO>
+dlaspdla&spd, ERRO LEXICO
+;, <PONTO_E_VIRGULA>

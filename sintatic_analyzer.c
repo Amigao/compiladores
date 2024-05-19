@@ -102,6 +102,10 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
         }
     }
 
+    if(current_state == 10){
+        printf("COMENTARIO ABERTO E NAO FECHADO: \"%s\"", buffer);
+    }
+
     // imprime os erros encontrados
     printErrors(error_list);
     

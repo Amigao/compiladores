@@ -23,7 +23,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-
     // chama o analisador sintatico
     sintatic_analyzer(input_file, output_file);
 
