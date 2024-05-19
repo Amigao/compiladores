@@ -24,8 +24,13 @@ $(EXEC): $(OBJS)
 
 .PHONY: run clean
 
+# Regra para executar o programa, aceitando um arquivo de entrada e usando input.txt caso não haja entrada do usuario
 run: $(EXEC)
+ifeq ($(ARGS),)
 	./$(EXEC) input.txt
+else
+	./$(EXEC) $(ARGS)
+endif
 
 clean:
-	rm -f $(EXEC) $(OBJS)
+	rm -f $(EXEC) $(OBJS)	

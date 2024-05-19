@@ -1,0 +1,5 @@
+VAR Pedro,cdsa%das;
+BEGIN
+    b:=3+6;
+    c:=@+b;
+END.

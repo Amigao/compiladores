@@ -1,22 +1,20 @@
 VAR, <VAR>
-MicHel123, ident
+Pedro, ident
 ,, <VIRGULA>
-b, ident
-,, <VIRGULA>
-cdsadas, ident
+cdsa%das, ERRO LEXICO
 ;, <PONTO_E_VIRGULA>
 BEGIN, <BEGIN>
 b, ident
 :=, <SIMBOLO_ATRIBUICAO>
-3x, ERRO LEXICO
+3, number
++, <SIMBOLO_SOMA>
+6, number
 ;, <PONTO_E_VIRGULA>
 c, ident
 :=, <SIMBOLO_ATRIBUICAO>
 @, ERRO LEXICO
 +, <SIMBOLO_SOMA>
 b, ident
-;, <PONTO_E_VIRGULA>
-dlaspdla&spd, ERRO LEXICO
 ;, <PONTO_E_VIRGULA>
 END, <END>
 ., <PONTO>

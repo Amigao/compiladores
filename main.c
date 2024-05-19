@@ -14,10 +14,15 @@ int main(int argc, char *argv[]) {
     FILE *input_file = fopen(argv[1], "r");
     FILE *output_file = fopen("output.txt", "w");
     // Check files
-    if (output_file == NULL || input_file == NULL) {
-        printf("Erro ao abrir o arquivo.\n");
+    if (output_file == NULL) {
+        printf("Erro ao abrir o arquivo de saida.\n");
         return 1;
     }
+    if (input_file == NULL) {
+        printf("Erro ao abrir o arquivo de entrada. Certifique-se de adiciona-lo ao comando.\n");
+        return 1;
+    }
+
 
     // chama o analisador sintatico
     sintatic_analyzer(input_file, output_file);

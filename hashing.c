@@ -32,7 +32,7 @@ int hash_function(char *word) {
 // Função para inicializar a tabela hash
 void initialize_table(Table *table) {
     for (int i = 0; i < TABLE_SIZE; i++) {
-        table->table[i] = NULL; // Inicializa cada entrada da tabela como NULL
+        table->table[i] = NULL;
     }
 }
 
