@@ -18,3 +18,5 @@ b, ident
 ;, <PONTO_E_VIRGULA>
 dlaspdla&spd, ERRO LEXICO
 ;, <PONTO_E_VIRGULA>
+END, <END>
+., <PONTO>

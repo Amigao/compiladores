@@ -2,6 +2,7 @@
 #define ERRORS_MANAGEMENT_H
 
 #define ERRO_LEXICO 0
+#define ERRO_COMENTARIO_NAO_FECHADO 1
 
 // Definição da estrutura para um nó da lista ligada
 typedef struct ErrorInfo{

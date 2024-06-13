@@ -1,8 +1,8 @@
 VAR MicHel123,b,cdsadas;
 {comentario correto}
+    {comentario errado
 BEGIN
     b:=3x;
     c:=@+b;
     dlaspdla&spd;
 END.
-    {comentario errado

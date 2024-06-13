@@ -29,7 +29,7 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
 
     //struct para guardar token/classe
     TokenInfo tok;
-
+    
     // Enquanto nao acabar o arquivo
     while ((c = fgetc(input_file)) != EOF) {
         // contador de linhas
@@ -38,13 +38,24 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
         }
 
         // chegou no espaço ou \n indica, que acabou a token
-        if (isspace(c) || c == '\n') {
-            if(tok.state == 10 && isspace(c)){
-                buffer[i] = c;
-                buffer[i + 1] = '\0';
-                current_state = tok.state;
-                i++;
-                continue;
+        if (c == ' ' || c == '\n') {
+
+            if(tok.state == 10){
+                if(c == ' ') {
+                    buffer[i] = c;
+                    buffer[i + 1] = '\0';
+                    current_state = tok.state;
+                    i++;
+                    continue;
+                } else {
+                    insert_error(&error_list, tok.token, number_of_lines, ERRO_COMENTARIO_NAO_FECHADO);
+                    //volta para o estado incial e reseta as Variaveis
+                    current_state = INITIAL_STATE;
+                    i = 0;
+                    buffer[i] = '\0';
+                    tok.final = false;
+                    continue;
+                }
             }
             
             if(tok.final){
@@ -100,10 +111,6 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
                 i++;
             }
         }
-    }
-
-    if(current_state == 10){
-        printf("COMENTARIO ABERTO E NAO FECHADO: \"%s\"", buffer);
     }
 
     // imprime os erros encontrados

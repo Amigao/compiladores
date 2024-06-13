@@ -50,6 +50,7 @@ void printErrors(ErrorInfo *head) {
     ErrorInfo *current = head;
     while (current != NULL) {
         if (current->type == ERRO_LEXICO) printf("ERRO: erro LEXICO encontrado na linha %d. Termo \"%s\" mal formado.\n", current->line, current->word);
+        if (current->type == ERRO_COMENTARIO_NAO_FECHADO) printf("ERRO: comentario nao fechado encontrado na linha %d. Termo \"%s\" mal formado.\n", current->line, current->word);
         current = current->next;        
     }
     printf("\n\n");
