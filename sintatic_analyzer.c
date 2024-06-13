@@ -29,17 +29,15 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
 
     //struct para guardar token/classe
     TokenInfo tok;
+    tok.new_line = false;
 
     // Enquanto nao acabar o arquivo
     while ((c = fgetc(input_file)) != EOF) {
-        // contador de linhas
-        if (c == '\n') {
-            number_of_lines++;
-        }
+        // printf("%c\n", c);
 
         // chegou no espaço ou \n indica, que acabou a token
-        if (isspace(c) || c == '\n') {
-            if(tok.state == 10 && isspace(c)){
+        if (isspace(c)) { // || c == '\n'
+            if(tok.state == 10){
                 buffer[i] = c;
                 buffer[i + 1] = '\0';
                 current_state = tok.state;
@@ -53,6 +51,7 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
                 }
                 // imprime no arquivo de saida o par token/identificador
                 fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+                printf("%s, %s\n", tok.token, tok.identifier);
                 //volta para o estado incial e reseta as Variaveis
                 current_state = INITIAL_STATE;
                 i = 0;
@@ -60,11 +59,21 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
                 tok.final = false;
             }
 
+
         } else {
 
             // chama o lexico para cada caracter
             tok = lexical_analyzer(c, buffer, &reservedTable, current_state);
             
+            if (tok.new_line){
+                printf("quebra de linha: %c\n", c);
+                number_of_lines++;
+                tok.new_line = false;
+                if (current_state == 10) {
+                    insert_error(&error_list, tok.token, number_of_lines, ERRO_COMENTARIO);
+                }
+            } 
+
             // se entrar no estado de comentario
             if(tok.state == 11){
                 buffer[i] = c;
@@ -83,8 +92,10 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
                 if (current_state == -1){
                     insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
                 }
+
                 //adiciona ao arquivo de saida
                 fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+                printf("%s, %s\n", tok.token, tok.identifier);
                 
                 // devolve o caractere pra cadeia de entrada
                 ungetc(c, input_file);
@@ -100,10 +111,6 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
                 i++;
             }
         }
-    }
-
-    if(current_state == 10){
-        printf("COMENTARIO ABERTO E NAO FECHADO: \"%s\"", buffer);
     }
 
     // imprime os erros encontrados

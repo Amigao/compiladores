@@ -10,6 +10,7 @@ typedef struct TokenInfo {
     char *token;
     char *identifier;  
     int state;
+    bool new_line;
     bool final;
 } TokenInfo;
 

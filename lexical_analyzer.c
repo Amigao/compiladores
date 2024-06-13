@@ -80,32 +80,35 @@ int transition(int state, char c) {
             if (is_delimiter(c)) return 4;  // delimitadores
             if (is_single_operator(c)) return 6;  // operador com um caractere
             if (c == '{') return 10;  // comentario
+            if (c == '\n') return 12;
             break;
         case 1:
             if (isalpha(c) || isdigit(c)) return 1;  // letras maiúsculas e minúsculas continuam no estado 1
             if (is_valid_symbol(c)) return 7;
+            if (c == '\n') return 12;
             break;
         case 2:
             if (isalpha(c)) return -1;
             if (isdigit(c)) return 2;
             if (is_valid_symbol(c)) return 7;
+            if (c == '\n') return 12;
             break;
         case 3:
             if(is_second_double_operator(c)) return 5;
             else return 7;
             break;
         case 4:
+            if (c == '\n') return 12;
         case 5:
         case 6:
             return 7;
             break;  
-
         // Se entrar no estado de comentario, continua ate achar o simbolo de encerrar comentario
         case 10:
             if(c == '}') return 11;
+            if(c == '\n') return 12;
             else return 10;
             break;
-
 
         // Estado de erro
         case -1:
@@ -133,8 +136,14 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
     if (is_final_state(new_state)){
 
         int length = strlen(tok.token);
-        if(new_state == RETURN_STATE){ // se for estado de retroceder, não adiciona o caracter da cadeia no token lido
+        if (new_state == 12){
             tok.token[length] = '\0';
+            tok.new_line = true;
+            if (current_state == 11) tok.identifier = my_strdup("COMENTARIO NAO FECHADO");
+
+        } else if(new_state == RETURN_STATE){ // se for estado de retroceder, não adiciona o caracter da cadeia no token lido
+            tok.token[length] = '\0';
+        
         } else {
             tok.token[length] = character;
             tok.token[length + 1] = '\0';
@@ -145,7 +154,7 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
         if (current_state == 2) tok.identifier = my_strdup("number");
         else if (current_state == -1) tok.identifier = my_strdup("ERRO LEXICO");
-        else tok.identifier = check_reserved_table(reservedTable,tok.token);
+        else tok.identifier = check_reserved_table(reservedTable, tok.token);
         
     }
 
