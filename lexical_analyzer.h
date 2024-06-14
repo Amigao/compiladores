@@ -8,6 +8,7 @@
 
 typedef struct TokenInfo {
     char *token;
+    int token_enum;
     char *identifier;  
     int state;
     bool final;

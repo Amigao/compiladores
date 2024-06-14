@@ -3,16 +3,25 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "tokens_enum.h"
 #include "lexical_analyzer.h"
 #include "hashing.h"
 
 // Funcao para checar se o token esta na tabela de palavras e simbolos reservados
-char *check_reserved_table(Table *table, char *string){
-    char *result = search_table(table, string);
+void check_reserved_table(Table *table, TokenInfo *tok) {
+    char *result = search_table(table, tok->token);
     if (result != NULL) {
-        return result;
+        tok->identifier = result;
+        // Atribuir o enum correspondente ao token encontrado
+        for (int i = 0; i < TOKEN_COUNT; i++) {
+            if (strcmp(result, TokenTypeStrings[i]) == 0) {
+                tok->token_enum = (TokenType)i;
+                break;
+            }
+        }
     } else {
-        return "ident";
+        tok->identifier = "ident";
+        tok->token_enum = IDENT;
     }
 }
 
@@ -145,7 +154,7 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
         if (current_state == 2) tok.identifier = my_strdup("number");
         else if (current_state == -1) tok.identifier = my_strdup("ERRO LEXICO");
-        else tok.identifier = check_reserved_table(reservedTable,tok.token);
+        else check_reserved_table(reservedTable, &tok);
         
     }
 

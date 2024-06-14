@@ -2,6 +2,7 @@
     "files.associations": {
         "hashing.h": "c",
         "errors_management.h": "c",
-        "lexical_analyzer.h": "c"
+        "lexical_analyzer.h": "c",
+        "tokens_enum.h": "c"
     }
 }

@@ -11,7 +11,7 @@ OBJS = $(SRCS:.c=.o)
 EXEC = programa
 
 # Dependências
-DEPS = lexical_analyzer.h sintatic_analyzer.h hashing.h errors_management.h
+DEPS = lexical_analyzer.h sintatic_analyzer.h hashing.h errors_management.h tokens_enum.h
 
 # Regra de compilação
 all: $(EXEC)
