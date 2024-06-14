@@ -1,8 +1,21 @@
-VAR MicHel123,b,cdsadas;
-{comentario correto}
-    {comentario errado
+CONST max = 10;
+VAR i, sum;
+PROCEDURE calculateSum ;
+  VAR temp ;
+  BEGIN
+    temp := 0 ;
+    i := 1 ;
+    WHILE i <= max DO
+      BEGIN
+        temp := temp + i ;
+        i := i + 1;
+      END ;
+    sum := temp
+  END;
 BEGIN
-    b:=3x;
-    c:=@+b;
-    dlaspdla&spd;
+  CALL calculateSum ;
+  IF sum = 55 THEN
+    sum := 100 ;
+  WHILE sum > 0 DO
+    sum := sum - 1
 END.

@@ -4,114 +4,22 @@
 #include <ctype.h>
 
 #include "lexical_analyzer.h"
-#include "errors_management.h"
-#include "hashing.h"
+#include "sintatic_analyzer.h"
 
-#define MAX_BUF_SIZE 100
+//struct para guardar token/classe
+TokenInfo tok;
+Table reservedTable;
+ErrorInfo *error_list;
+
 
 void sintatic_analyzer(FILE *input_file, FILE *output_file){
     // Constroi tabela reservada
-    Table reservedTable;
     build_reserved_table(&reservedTable);
-   
+
     // Constroi lista de erros
-    ErrorInfo *error_list = NULL;
+    error_list = NULL;
 
-    // Estado inicial do automato
-    int current_state = INITIAL_STATE;
-
-    // Variaveis para percorrer o arquivo e guardar token/classe 
-    char c;
-    char buffer[MAX_BUF_SIZE];
-    int i = 0;
-    buffer[0] = '\0';
-    int number_of_lines = 1; 
-
-    //struct para guardar token/classe
-    TokenInfo tok;
-    
-    // Enquanto nao acabar o arquivo
-    while ((c = fgetc(input_file)) != EOF) {
-        // contador de linhas
-        if (c == '\n') {
-            number_of_lines++;
-        }
-
-        // chegou no espaço ou \n indica, que acabou a token
-        if (c == ' ' || c == '\n') {
-
-            if(tok.state == 10){
-                if(c == ' ') {
-                    buffer[i] = c;
-                    buffer[i + 1] = '\0';
-                    current_state = tok.state;
-                    i++;
-                    continue;
-                } else {
-                    insert_error(&error_list, tok.token, number_of_lines, ERRO_COMENTARIO_NAO_FECHADO);
-                    //volta para o estado incial e reseta as Variaveis
-                    current_state = INITIAL_STATE;
-                    i = 0;
-                    buffer[i] = '\0';
-                    tok.final = false;
-                    continue;
-                }
-            }
-            
-            if(tok.final){
-                if (tok.state == -1){
-                    insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
-                }
-                // imprime no arquivo de saida o par token/identificador
-                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
-                //volta para o estado incial e reseta as Variaveis
-                current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-                tok.final = false;
-            }
-
-        } else {
-
-            // chama o lexico para cada caracter
-            tok = lexical_analyzer(c, buffer, &reservedTable, current_state);
-            
-            // se entrar no estado de comentario
-            if(tok.state == 11){
-                buffer[i] = c;
-                buffer[i+1] = '\0';
-                // imprime o comentario que foi resetado
-                printf("\nCOMENTARIO IGNORADO: %s\n", buffer);
-                // reseta as variaveis
-                current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-                tok.final = false;
-            }
-            
-            // Se entrou no estado de retroceder
-            else if (tok.state == RETURN_STATE) {
-                if (current_state == -1){
-                    insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
-                }
-                //adiciona ao arquivo de saida
-                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
-                
-                // devolve o caractere pra cadeia de entrada
-                ungetc(c, input_file);
-                // reseta as variaveis
-                current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-
-            } else { // se nao, continua lendo e adicionando no buffer
-                buffer[i] = c;
-                buffer[i + 1] = '\0';
-                current_state = tok.state;
-                i++;
-            }
-        }
-    }
+    programa(input_file, output_file);
 
     // imprime os erros encontrados
     printErrors(error_list);
@@ -122,3 +30,264 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
 
 }
 
+void programa(FILE* input_file, FILE *output_file){
+    tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    bloco(input_file, output_file);
+    if (tok.token_enum != PONTO) {
+        // Erro: token inesperado
+        printf("Erro: '.' esperado no final do programa.\n");
+        exit(1);
+    }
+}
+
+void bloco(FILE* input_file, FILE *output_file){
+    declaracao(input_file, output_file);
+    comando(input_file, output_file);
+}
+
+void declaracao(FILE* input_file, FILE *output_file){
+    constante(input_file, output_file);
+    variavel(input_file, output_file);
+    procedimento(input_file, output_file);
+}
+
+void constante(FILE* input_file, FILE *output_file){
+    if (tok.token_enum == CONST) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != IDENT) {
+            printf("Erro: Identificador esperado apos 'CONST'.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != IGUAL) {
+            printf("Erro: '=' esperado apos identificador.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != NUMERO) {
+            printf("Erro: Numero esperado apos '='.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        mais_cont(input_file, output_file);
+        if (tok.token_enum != PONTO_E_VIRGULA) {
+            printf("Erro: ';' esperado apos declaracao de constante.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    }
+}
+
+void mais_cont(FILE* input_file, FILE *output_file){
+    if(tok.token_enum == VIRGULA){
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != IDENT) {
+            printf("Erro: Identificador esperado apos ','.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != IGUAL) {
+            printf("Erro: '=' esperado apos identificador.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != NUMERO) {
+            printf("Erro: Numero esperado apos '='.\n");
+            exit(1);
+        }
+
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        mais_cont(input_file, output_file);
+    }
+}
+
+void variavel(FILE* input_file, FILE *output_file){
+    if (tok.token_enum == VAR) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != IDENT) {
+            printf("Erro: Identificador esperado apos 'VAR'.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        mais_var(input_file, output_file);
+
+        if (tok.token_enum != PONTO_E_VIRGULA) {
+            printf("Erro: ';' esperado apos declaracao de variavel.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    }
+}
+
+void mais_var(FILE* input_file, FILE *output_file){
+    if(tok.token_enum == VIRGULA){
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != IDENT) {
+            printf("Erro: Identificador esperado apos ','.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        mais_var(input_file, output_file);
+    }
+}
+
+
+void procedimento(FILE* input_file, FILE *output_file){
+    if(tok.token_enum == PROCEDURE){
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != IDENT) {
+            printf("Erro: Identificador esperado apos 'PROCEDURE'.\n");
+            exit(1);
+        }
+        
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != PONTO_E_VIRGULA) {
+            printf("Erro: ';' esperado apos identificador.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        bloco(input_file, output_file);
+
+        if (tok.token_enum != PONTO_E_VIRGULA) {
+            printf("Erro: ';' esperado apos bloco de procedimento.\n");
+            exit(1);
+        }
+
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        procedimento(input_file, output_file);
+    }
+}
+
+void comando(FILE* input_file, FILE *output_file){
+    if (tok.token_enum == IDENT) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum == ATRIBUICAO) {
+            tok = getNextToken(input_file, output_file, error_list, reservedTable);
+            expressao(input_file, output_file);
+        } else {
+            printf("Erro: ':=' esperado apos identificador.\n");
+            exit(1);
+        }
+    } else if (tok.token_enum == CALL) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        if (tok.token_enum != IDENT) {
+            printf("Erro: Identificador esperado apos 'CALL'.\n");
+            exit(1);
+        }
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    } else if (tok.token_enum == BEGIN) {
+        do {
+            tok = getNextToken(input_file, output_file, error_list, reservedTable);
+            comando(input_file, output_file);
+        } while (tok.token_enum == PONTO_E_VIRGULA);
+        if (tok.token_enum != END) {
+            printf("Erro: 'END' esperado.\n");
+            exit(1);
+        }
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    } else if (tok.token_enum == IF) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        condicao(input_file, output_file);
+        if (tok.token_enum != THEN) {
+            printf("Erro: 'THEN' esperado.\n");
+            exit(1);
+        }
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        comando(input_file, output_file);
+    } else if (tok.token_enum == WHILE) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        condicao(input_file, output_file);
+        if (tok.token_enum != DO) {
+            printf("Erro: 'DO' esperado.\n");
+            exit(1);
+        }
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        comando(input_file, output_file);
+    }
+}
+
+
+void expressao(FILE* input_file, FILE *output_file){
+    operador_unitario(input_file, output_file);
+    termo(input_file, output_file);
+    mais_termos(input_file, output_file);
+}
+
+void operador_unitario(FILE* input_file, FILE *output_file){
+    if (tok.token_enum == SOMA || tok.token_enum == SUBTRACAO) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    }
+}
+
+void termo(FILE* input_file, FILE* output_file){
+    fator(input_file, output_file);
+    mais_fatores(input_file, output_file);
+}
+
+void mais_termos(FILE* input_file, FILE *output_file){
+    if (tok.token_enum == SOMA || tok.token_enum == SUBTRACAO) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        termo(input_file, output_file);
+        mais_termos(input_file, output_file);
+    }
+}
+
+void fator(FILE* input_file, FILE* output_file){
+    if (tok.token_enum == IDENT || tok.token_enum == NUMERO) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+
+    } else if (tok.token_enum == PARENTESE_ESQUERDA) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        expressao(input_file, output_file);
+        if (tok.token_enum != PARENTESE_DIREITA) {
+            printf("Erro: ')' esperado.\n");
+            exit(1);
+        }
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+
+    } else {
+        printf("Erro: Fator inválido.\n");
+        exit(1);
+    }
+}
+
+void mais_fatores(FILE* input_file, FILE* output_file){
+    if (tok.token_enum == MULTIPLICACAO || tok.token_enum == DIVISAO) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        fator(input_file, output_file);
+        mais_fatores(input_file, output_file);
+    }
+}
+
+void condicao(FILE* input_file, FILE* output_file){
+    if (tok.token_enum == ODD) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+        expressao(input_file, output_file);
+    } else {
+        expressao(input_file, output_file);
+        relacional(input_file, output_file);
+        expressao(input_file, output_file);
+    }
+}
+
+void relacional(FILE* input_file, FILE* output_file){
+    if (tok.token_enum == IGUAL || tok.token_enum == DIFERENTE
+                                || tok.token_enum == MENOR || tok.token_enum == MENOR_IGUAL
+                                || tok.token_enum == MAIOR || tok.token_enum == MAIOR_IGUAL) {
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    } else {
+        printf("Erro: Operador relacional esperado.\n");
+        exit(1);
+    }
+}

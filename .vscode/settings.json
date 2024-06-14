@@ -3,6 +3,8 @@
         "hashing.h": "c",
         "errors_management.h": "c",
         "lexical_analyzer.h": "c",
-        "tokens_enum.h": "c"
+        "tokens_enum.h": "c",
+        "stdbool.h": "c",
+        "sintatic_analyzer.h": "c"
     }
 }

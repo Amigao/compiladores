@@ -3,9 +3,60 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "tokens_enum.h"
 #include "lexical_analyzer.h"
-#include "hashing.h"
+
+const char* TokenTypeStrings[] = {
+    // Não-terminais
+    "PROGRAMA",
+    "BLOCO",
+    "DECLARACAO",
+    "CONSTANTE",
+    "MAIS_CONST",
+    "VARIAVEL",
+    "MAIS_VAR",
+    "PROCEDIMENTO",
+    "COMANDO",
+    "MAIS_CMD",
+    "EXPRESSAO",
+    "OPERADOR_UNARIO",
+    "TERMO",
+    "MAIS_TERMOS",
+    "FATOR",
+    "MAIS_FATORES",
+    "CONDICAO",
+    "RELACIONAL",
+
+    // Terminais
+    "CONST",
+    "IDENT",
+    "NUMERO",
+    "VIRGULA",
+    "PONTO_E_VIRGULA",
+    "IGUAL",
+    "ATRIBUICAO",
+    "VAR",
+    "PROCEDURE",
+    "CALL",
+    "BEGIN",
+    "END",
+    "IF",
+    "THEN",
+    "WHILE",
+    "DO",
+    "SUBTRACAO",
+    "SOMA",
+    "MULTIPLICACAO",
+    "DIVISAO",
+    "PARENTESE_ESQUERDA",
+    "PARENTESE_DIREITA",
+    "ODD",
+    "DIFERENTE",
+    "MENOR",
+    "MENOR_IGUAL",
+    "MAIOR",
+    "MAIOR_IGUAL",
+    "PONTO"
+};
 
 // Funcao para checar se o token esta na tabela de palavras e simbolos reservados
 void check_reserved_table(Table *table, TokenInfo *tok) {
@@ -20,7 +71,7 @@ void check_reserved_table(Table *table, TokenInfo *tok) {
             }
         }
     } else {
-        tok->identifier = "ident";
+        tok->identifier = "IDENT";
         tok->token_enum = IDENT;
     }
 }
@@ -28,33 +79,33 @@ void check_reserved_table(Table *table, TokenInfo *tok) {
 // Adiciona palavras e simbolos reservados na tabela
 void build_reserved_table(Table *table){
     initialize_table(table);
-    insert_table(table, "CONST",  "<CONST>");
-    insert_table(table, "VAR", "<VAR>");
-    insert_table(table, "PROCEDURE", "<PROCEDURE>");
-    insert_table(table, "BEGIN", "<BEGIN>");
-    insert_table(table, "END", "<END>");
-    insert_table(table, "CALL", "<CALL>");
-    insert_table(table, "IF", "<IF>");
-    insert_table(table, "THEN", "<THEN>");
-    insert_table(table, "WHILE", "<WHILE>");
-    insert_table(table, "DO", "<DO>");
-    insert_table(table, "ODD", "<ODD>");
-    insert_table(table, "+", "<SIMBOLO_SOMA>");
-    insert_table(table, "-", "<SIMBOLO_SUBTRACAO>");
-    insert_table(table, "*", "<SIMBOLO_MULTIPLICACAO>");
-    insert_table(table, "/", "<SIMBOLO_DIVISAO>");
-    insert_table(table, "=", "<SIMBOLO_IGUAL>");
-    insert_table(table, "<>", "<SIMBOLO_DIFERENTE>");
-    insert_table(table, "<", "<SIMBOLO_MENOR>");
-    insert_table(table, "<=", "<SIMBOLO_MENOR_IGUAL>");
-    insert_table(table, ">", "<SIMBOLO_MAIOR>");
-    insert_table(table, ">=", "<SIMBOLO_MAIOR_IGUAL>");
-    insert_table(table, ":=", "<SIMBOLO_ATRIBUICAO>");
-    insert_table(table, "(", "<PARENTESE_ESQUERDA>");
-    insert_table(table, ")", "<PARENTESE_DIREITA>");
-    insert_table(table, ",", "<VIRGULA>");
-    insert_table(table, ";", "<PONTO_E_VIRGULA>");
-    insert_table(table, ".", "<PONTO>");
+    insert_table(table, "CONST",  "CONST");
+    insert_table(table, "VAR", "VAR");
+    insert_table(table, "PROCEDURE", "PROCEDURE");
+    insert_table(table, "BEGIN", "BEGIN");
+    insert_table(table, "END", "END");
+    insert_table(table, "CALL", "CALL");
+    insert_table(table, "IF", "IF");
+    insert_table(table, "THEN", "THEN");
+    insert_table(table, "WHILE", "WHILE");
+    insert_table(table, "DO", "DO");
+    insert_table(table, "ODD", "ODD");
+    insert_table(table, "+", "SOMA");
+    insert_table(table, "-", "SUBTRACAO");
+    insert_table(table, "*", "MULTIPLICACAO");
+    insert_table(table, "/", "DIVISAO");
+    insert_table(table, "=", "IGUAL");
+    insert_table(table, "<>", "DIFERENTE");
+    insert_table(table, "<", "MENOR");
+    insert_table(table, "<=", "MENOR_IGUAL");
+    insert_table(table, ">", "MAIOR");
+    insert_table(table, ">=", "MAIOR_IGUAL");
+    insert_table(table, ":=", "ATRIBUICAO");
+    insert_table(table, "(", "PARENTESE_ESQUERDA");
+    insert_table(table, ")", "PARENTESE_DIREITA");
+    insert_table(table, ",", "VIRGULA");
+    insert_table(table, ";", "PONTO_E_VIRGULA");
+    insert_table(table, ".", "PONTO");
 }
 
 // Funcoes auxiliares para conferir o estado do automato 
@@ -152,7 +203,10 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         tok.final = true;
         
         // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
-        if (current_state == 2) tok.identifier = my_strdup("number");
+        if (current_state == 2) {
+            tok.identifier = my_strdup("NUMERO");
+            tok.token_enum = NUMERO; 
+        }
         else if (current_state == -1) tok.identifier = my_strdup("ERRO LEXICO");
         else check_reserved_table(reservedTable, &tok);
         
@@ -160,4 +214,104 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
 
     // retorna o par token/classe
     return tok;
+}
+
+TokenInfo getNextToken(FILE* input_file, FILE *output_file, ErrorInfo *error_list, Table reservedTable){
+    TokenInfo tok;
+
+    // Estado inicial do automato
+    int current_state = INITIAL_STATE;
+
+    // Variaveis para percorrer o arquivo e guardar token/classe 
+    char c;
+    char buffer[MAX_BUF_SIZE];
+    int i = 0;
+    buffer[0] = '\0';
+    int number_of_lines = 1; 
+
+    // Enquanto nao acabar o arquivo
+    while ((c = fgetc(input_file)) != EOF) {
+
+        // contador de linhas
+        if (c == '\n') {
+            number_of_lines++;
+        }
+
+        // chegou no espaço ou \n indica, que acabou a token
+        if (c == ' ' || c == '\n') {
+
+            if(tok.state == 10){
+                if(c == ' ') {
+                    buffer[i] = c;
+                    buffer[i + 1] = '\0';
+                    current_state = tok.state;
+                    i++;
+                    continue;
+                } else {
+                    insert_error(&error_list, tok.token, number_of_lines, ERRO_COMENTARIO_NAO_FECHADO);
+                    //volta para o estado incial e reseta as Variaveis
+                    current_state = INITIAL_STATE;
+                    i = 0;
+                    buffer[i] = '\0';
+                    tok.final = false;
+                    continue;
+                }
+            }
+            
+            if(tok.final){
+                if (tok.state == -1){
+                    insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
+                }
+                // imprime no arquivo de saida o par token/identificador
+                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+                return tok;
+                //volta para o estado incial e reseta as Variaveis
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
+                tok.final = false;
+            }
+
+        } else {
+
+            // chama o lexico para cada caracter
+            tok = lexical_analyzer(c, buffer, &reservedTable, current_state);
+            
+            // se entrar no estado de comentario
+            if(tok.state == 11){
+                buffer[i] = c;
+                buffer[i+1] = '\0';
+                // imprime o comentario que foi resetado
+                printf("\nCOMENTARIO IGNORADO: %s\n", buffer);
+                // reseta as variaveis
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
+                tok.final = false;
+            }
+            
+            // Se entrou no estado de retroceder
+            else if (tok.state == RETURN_STATE) {
+                if (current_state == -1){
+                    insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
+                }
+                //adiciona ao arquivo de saida
+                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+                return tok;
+                
+                // devolve o caractere pra cadeia de entrada
+                ungetc(c, input_file);
+                // reseta as variaveis
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
+
+            } else { // se nao, continua lendo e adicionando no buffer
+                buffer[i] = c;
+                buffer[i + 1] = '\0';
+                current_state = tok.state;
+                i++;
+            }
+        }
+    }
 }
