@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "sintatic_analyzer.h"
 
 int main(int argc, char *argv[]) {

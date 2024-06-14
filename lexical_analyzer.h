@@ -8,13 +8,14 @@
 
 typedef struct TokenInfo {
     char *token;
+    int token_enum;
     char *identifier;  
     int state;
     bool final;
 } TokenInfo;
 
+void check_reserved_table(Table *table, TokenInfo *tok); 
 void build_reserved_table(Table *table);
-
 TokenInfo lexical_analyzer(char character, char* buffer, Table *reservedTable, int current_state);
     
 #endif

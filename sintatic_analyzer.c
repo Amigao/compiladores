@@ -29,16 +29,18 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
 
     //struct para guardar token/classe
     TokenInfo tok;
+    tok.state = INITIAL_STATE;
     
     // Enquanto nao acabar o arquivo
     while ((c = fgetc(input_file)) != EOF) {
+        
         // contador de linhas
         if (c == '\n') {
             number_of_lines++;
         }
 
-        // chegou no espaço ou \n indica, que acabou a token
-        if (c == ' ' || c == '\n') {
+        // chegou no espaço ou \n indica, que acabou o token
+        if (c == ' ' || c == '\n' || tok.state == RETURN_STATE) {
 
             if(tok.state == 10){
                 if(c == ' ') {
@@ -46,65 +48,48 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
                     buffer[i + 1] = '\0';
                     current_state = tok.state;
                     i++;
-                    continue;
                 } else {
                     insert_error(&error_list, tok.token, number_of_lines, ERRO_COMENTARIO_NAO_FECHADO);
                     //volta para o estado incial e reseta as Variaveis
-                    current_state = INITIAL_STATE;
                     i = 0;
                     buffer[i] = '\0';
                     tok.final = false;
-                    continue;
                 }
+                continue;
             }
             
             if(tok.final){
+                printf("cheguei aqui no token: %d\n", tok.state);
+                // se entrar no estado de comentario
+
+                if (tok.state == RETURN_STATE) {
+                    tok.state = current_state; // atribui o ultimo estado ao token, sobrescrevendo o estado de retorno, se ele for um erro
+                    ungetc(c, input_file); // devolve o caractere pra cadeia de entrada           
+                }
+
                 if (tok.state == -1){
                     insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
                 }
-                // imprime no arquivo de saida o par token/identificador
-                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
+
+                if(tok.state == 11){
+                    // imprime o comentario que foi resetado
+                    printf("\nCOMENTARIO IGNORADO: %s\n", buffer);
+                }
+                else fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
                 //volta para o estado incial e reseta as Variaveis
-                current_state = INITIAL_STATE;
                 i = 0;
                 buffer[i] = '\0';
                 tok.final = false;
             }
+            current_state = INITIAL_STATE;
+            tok.state = INITIAL_STATE;
 
         } else {
 
             // chama o lexico para cada caracter
             tok = lexical_analyzer(c, buffer, &reservedTable, current_state);
             
-            // se entrar no estado de comentario
-            if(tok.state == 11){
-                buffer[i] = c;
-                buffer[i+1] = '\0';
-                // imprime o comentario que foi resetado
-                printf("\nCOMENTARIO IGNORADO: %s\n", buffer);
-                // reseta as variaveis
-                current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-                tok.final = false;
-            }
-            
-            // Se entrou no estado de retroceder
-            else if (tok.state == RETURN_STATE) {
-                if (current_state == -1){
-                    insert_error(&error_list, tok.token, number_of_lines, ERRO_LEXICO);
-                }
-                //adiciona ao arquivo de saida
-                fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
-                
-                // devolve o caractere pra cadeia de entrada
-                ungetc(c, input_file);
-                // reseta as variaveis
-                current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-
-            } else { // se nao, continua lendo e adicionando no buffer
+            if (tok.state != RETURN_STATE){
                 buffer[i] = c;
                 buffer[i + 1] = '\0';
                 current_state = tok.state;
@@ -119,6 +104,5 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file){
     // libera as tabelas e listas utilizadas
     free_error_list(error_list);
     free_table(&reservedTable);
-
 }
 
