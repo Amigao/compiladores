@@ -3,7 +3,7 @@ VAR i, sum;
 PROCEDURE calculateSum ;
   VAR temp ;
   BEGIN
-    temp := 0 ;
+    temp = 0 ;
     i := 1 ;
     WHILE i <= max DO
       BEGIN
@@ -11,11 +11,11 @@ PROCEDURE calculateSum ;
         i := i + 1;
       END ;
     sum := temp
-  END;
-BEGIN
-  CALL calculateSum ;
-  IF sum = 55 THEN
-    sum := 100 ;
-  WHILE sum > 0 DO
+  EN;
+BEGN
+  CALL calculateSum 
+  IF sum  55 THEN
+    sum = 100 ;
+  WHIE sum  0 DO
     sum := sum - 1
-END.
+E

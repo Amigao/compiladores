@@ -2,26 +2,6 @@
 #define TOKENS_ENUM_H
 
 typedef enum {
-    // Não-terminais
-    PROGRAMA,
-    BLOCO,
-    DECLARACAO,
-    CONSTANTE,
-    MAIS_CONST,
-    VARIAVEL,
-    MAIS_VAR,
-    PROCEDIMENTO,
-    COMANDO,
-    MAIS_CMD,
-    EXPRESSAO,
-    OPERADOR_UNARIO,
-    TERMO,
-    MAIS_TERMOS,
-    FATOR,
-    MAIS_FATORES,
-    CONDICAO,
-    RELACIONAL,
-
     // Terminais
     CONST,
     IDENT,
@@ -52,8 +32,10 @@ typedef enum {
     MAIOR,
     MAIOR_IGUAL,
     PONTO,
-    TOKEN_COUNT //contador do número de tokens
+    ENDOFFILE,
+    TOKEN_COUNT, //contador do número de tokens
     // Adicione outros terminais conforme necessário
+
 
 } TokenType;
 

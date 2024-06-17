@@ -12,6 +12,20 @@ Table reservedTable;
 ErrorInfo *error_list;
 
 
+void panic_mode(FILE *input_file, FILE *output_file, TokenType sync){
+    while(tok.token_enum != (int)sync && tok.token_enum != ENDOFFILE){
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    }
+    if(tok.token_enum != ENDOFFILE){
+        tok = getNextToken(input_file, output_file, error_list, reservedTable);
+    }
+    else{
+        printf("\n\nO modo de panico consumiu até o final do arquivo :( !!!!\n\n");
+        exit(-1);
+    }
+}
+
+
 void sintatic_analyzer(FILE *input_file, FILE *output_file){
     // Constroi tabela reservada
     build_reserved_table(&reservedTable);
@@ -36,7 +50,8 @@ void programa(FILE* input_file, FILE *output_file){
     if (tok.token_enum != PONTO) {
         // Erro: token inesperado
         printf("Erro: '.' esperado no final do programa.\n");
-        exit(1);
+        panic_mode(input_file, output_file, PONTO);
+        return;
     }
 }
 
@@ -56,26 +71,30 @@ void constante(FILE* input_file, FILE *output_file){
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos 'CONST'.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA );
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != IGUAL) {
             printf("Erro: '=' esperado apos identificador.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != NUMERO) {
             printf("Erro: Numero esperado apos '='.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         mais_cont(input_file, output_file);
         if (tok.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos declaracao de constante.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
@@ -87,19 +106,22 @@ void mais_cont(FILE* input_file, FILE *output_file){
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos ','.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != IGUAL) {
             printf("Erro: '=' esperado apos identificador.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != NUMERO) {
             printf("Erro: Numero esperado apos '='.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
 
@@ -113,7 +135,8 @@ void variavel(FILE* input_file, FILE *output_file){
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos 'VAR'.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
@@ -121,7 +144,8 @@ void variavel(FILE* input_file, FILE *output_file){
 
         if (tok.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos declaracao de variavel.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
@@ -133,7 +157,8 @@ void mais_var(FILE* input_file, FILE *output_file){
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos ','.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
@@ -147,13 +172,15 @@ void procedimento(FILE* input_file, FILE *output_file){
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos 'PROCEDURE'.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
         
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos identificador.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
@@ -161,7 +188,8 @@ void procedimento(FILE* input_file, FILE *output_file){
 
         if (tok.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos bloco de procedimento.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
 
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
@@ -177,13 +205,15 @@ void comando(FILE* input_file, FILE *output_file){
             expressao(input_file, output_file);
         } else {
             printf("Erro: ':=' esperado apos identificador.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
     } else if (tok.token_enum == CALL) {
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         if (tok.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos 'CALL'.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
     } else if (tok.token_enum == BEGIN) {
@@ -193,7 +223,8 @@ void comando(FILE* input_file, FILE *output_file){
         } while (tok.token_enum == PONTO_E_VIRGULA);
         if (tok.token_enum != END) {
             printf("Erro: 'END' esperado.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
     } else if (tok.token_enum == IF) {
@@ -201,7 +232,8 @@ void comando(FILE* input_file, FILE *output_file){
         condicao(input_file, output_file);
         if (tok.token_enum != THEN) {
             printf("Erro: 'THEN' esperado.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         comando(input_file, output_file);
@@ -210,7 +242,8 @@ void comando(FILE* input_file, FILE *output_file){
         condicao(input_file, output_file);
         if (tok.token_enum != DO) {
             printf("Erro: 'DO' esperado.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
         comando(input_file, output_file);
@@ -252,13 +285,15 @@ void fator(FILE* input_file, FILE* output_file){
         expressao(input_file, output_file);
         if (tok.token_enum != PARENTESE_DIREITA) {
             printf("Erro: ')' esperado.\n");
-            exit(1);
+            panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+            return;
         }
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
 
     } else {
         printf("Erro: Fator inválido.\n");
-        exit(1);
+        panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+        return;
     }
 }
 
@@ -288,6 +323,7 @@ void relacional(FILE* input_file, FILE* output_file){
         tok = getNextToken(input_file, output_file, error_list, reservedTable);
     } else {
         printf("Erro: Operador relacional esperado.\n");
-        exit(1);
+        panic_mode(input_file, output_file, PONTO_E_VIRGULA);
+        return;
     }
 }

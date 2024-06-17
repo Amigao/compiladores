@@ -6,26 +6,6 @@
 #include "lexical_analyzer.h"
 
 const char* TokenTypeStrings[] = {
-    // Não-terminais
-    "PROGRAMA",
-    "BLOCO",
-    "DECLARACAO",
-    "CONSTANTE",
-    "MAIS_CONST",
-    "VARIAVEL",
-    "MAIS_VAR",
-    "PROCEDIMENTO",
-    "COMANDO",
-    "MAIS_CMD",
-    "EXPRESSAO",
-    "OPERADOR_UNARIO",
-    "TERMO",
-    "MAIS_TERMOS",
-    "FATOR",
-    "MAIS_FATORES",
-    "CONDICAO",
-    "RELACIONAL",
-
     // Terminais
     "CONST",
     "IDENT",
@@ -55,6 +35,7 @@ const char* TokenTypeStrings[] = {
     "MENOR_IGUAL",
     "MAIOR",
     "MAIOR_IGUAL",
+    "EOF",
     "PONTO"
 };
 
@@ -320,4 +301,11 @@ TokenInfo getNextToken(FILE* input_file, FILE *output_file, ErrorInfo *error_lis
             }
         }
     }
+    if(tok.state != INITIAL_STATE && tok.state != RETURN_STATE){
+        insert_error(&error_list, buffer, number_of_lines, ERRO_LEXICO);
+    }
+    tok.identifier = "EOF";
+    tok.token_enum = ENDOFFILE;
+
+    return tok;
 }
