@@ -210,14 +210,20 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         else if (current_state == -1) tok.identifier = my_strdup("ERRO LEXICO");
         else check_reserved_table(reservedTable, &tok);
         
+    } else{
+        // Se ainda não é estado final, acumula no buffer
+        int length = strlen(tok.token);
+        tok.token[length] = character;
+        tok.token[length + 1] = '\0';
     }
-
     // retorna o par token/classe
     return tok;
 }
 
+
 TokenInfo getNextToken(FILE* input_file, FILE *output_file, ErrorInfo *error_list, Table reservedTable){
     TokenInfo tok;
+    (void)memset(&tok, 0, sizeof(TokenInfo));
 
     // Estado inicial do automato
     int current_state = INITIAL_STATE;
@@ -264,12 +270,12 @@ TokenInfo getNextToken(FILE* input_file, FILE *output_file, ErrorInfo *error_lis
                 }
                 // imprime no arquivo de saida o par token/identificador
                 fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
-                return tok;
                 //volta para o estado incial e reseta as Variaveis
                 current_state = INITIAL_STATE;
                 i = 0;
                 buffer[i] = '\0';
                 tok.final = false;
+                return tok;
             }
 
         } else {
@@ -297,7 +303,6 @@ TokenInfo getNextToken(FILE* input_file, FILE *output_file, ErrorInfo *error_lis
                 }
                 //adiciona ao arquivo de saida
                 fprintf(output_file, "%s, %s\n", tok.token, tok.identifier);
-                return tok;
                 
                 // devolve o caractere pra cadeia de entrada
                 ungetc(c, input_file);
@@ -306,6 +311,7 @@ TokenInfo getNextToken(FILE* input_file, FILE *output_file, ErrorInfo *error_lis
                 i = 0;
                 buffer[i] = '\0';
 
+                return tok;
             } else { // se nao, continua lendo e adicionando no buffer
                 buffer[i] = c;
                 buffer[i + 1] = '\0';

@@ -3,6 +3,7 @@
 
 #include "hashing.h"
 #include "tokens_enum.h"
+#include <stdio.h>
 #include "errors_management.h"
 
 #define RETURN_STATE 7
