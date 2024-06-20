@@ -6,6 +6,11 @@
         "tokens_enum.h": "c",
         "stdbool.h": "c",
         "sintatic_analyzer.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "aux.h": "c",
+        "stdlib.h": "c",
+        "string.h": "c",
+        "ctype.h": "c",
+        "aux_structs.h": "c"
     }
 }

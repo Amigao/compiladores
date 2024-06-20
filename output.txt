@@ -1,4 +1,1 @@
-erro SINTATICO, ERRO: Identificador esperado apos 'PROCEDURE'.. Linha 4200908.
-erro SINTATICO, ERRO: '.' esperado no final do programa.. Linha 4200908.
-ERRO: erro LEXICO encontrado na linha 2. Termo "@" mal formado.
-ERRO: erro LEXICO encontrado na linha 1. Termo "" mal formado.
+ERRO: erro LEXICO encontrado na linha 14. Termo "@" mal formado.

@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
 #include "lexical_analyzer.h"
-
 
 // Funcao para checar se o token esta na tabela de palavras e simbolos reservados
 void check_reserved_table(Table *table, TokenInfo *tok) {
@@ -173,7 +167,7 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
 }
 
 
-TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedTable){
+TokenInfo getNextToken(CompilingInfo *aux){
     TokenInfo tok;
     (void)memset(&tok, 0, sizeof(TokenInfo));
 
@@ -184,15 +178,14 @@ TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedT
     char c;
     char buffer[MAX_BUF_SIZE];
     int i = 0;
-    buffer[0] = '\0';
-    int number_of_lines = 1; 
+    buffer[0] = '\0'; 
 
     // Enquanto nao acabar o arquivo
-    while ((c = fgetc(input_file)) != EOF) {
+    while ((c = fgetc(aux->input_file)) != EOF) {
 
         // contador de linhas
         if (c == '\n') {
-            number_of_lines++;
+            aux->current_line++;
         }
 
         // chegou no espaço ou \n indica, que acabou a token
@@ -206,7 +199,7 @@ TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedT
                     i++;
                     continue;
                 } else {
-                    insert_error(error_list, number_of_lines, ERRO_COMENTARIO_NAO_FECHADO, tok.token);
+                    insert_error(aux, ERRO_COMENTARIO_NAO_FECHADO, tok.token);
                     //volta para o estado incial e reseta as Variaveis
                     current_state = INITIAL_STATE;
                     i = 0;
@@ -218,14 +211,13 @@ TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedT
             
             if(tok.final){
                 if (tok.state == -1){
-                    insert_error(error_list, number_of_lines, ERRO_LEXICO, tok.token);
+                    insert_error(aux, ERRO_LEXICO, tok.token);
                 }
                 //volta para o estado incial e reseta as Variaveis
                 current_state = INITIAL_STATE;
                 i = 0;
                 buffer[i] = '\0';
                 tok.final = false;
-                tok.token_line = number_of_lines;
                 // printf("token %s, enum %d\n", tok.token, tok.token_enum);
                 return tok;
             }
@@ -233,7 +225,7 @@ TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedT
         } else {
 
             // chama o lexico para cada caracter
-            tok = lexical_analyzer(c, buffer, &reservedTable, current_state);
+            tok = lexical_analyzer(c, buffer, &aux->reservedTable, current_state);
             
             // se entrar no estado de comentario
             if(tok.state == 11){
@@ -251,16 +243,15 @@ TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedT
             // Se entrou no estado de retroceder
             else if (tok.state == RETURN_STATE) {
                 if (current_state == -1){
-                    insert_error(error_list, number_of_lines, ERRO_LEXICO, tok.token);
+                    insert_error(aux, ERRO_LEXICO, tok.token);
                 }
                 
                 // devolve o caractere pra cadeia de entrada
-                ungetc(c, input_file);
+                ungetc(c, aux->input_file);
                 // reseta as variaveis
                 current_state = INITIAL_STATE;
                 i = 0;
                 buffer[i] = '\0';
-                tok.token_line = number_of_lines;
 
                 // printf("token %s, enum %d\n", tok.token, tok.token_enum);
                 return tok;
@@ -274,7 +265,7 @@ TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedT
     }
     
     if(!is_final_state(tok.state)){
-        insert_error(error_list, number_of_lines, ERRO_LEXICO, buffer);
+        insert_error(aux, ERRO_LEXICO, buffer);
     }
     
     if (i == 0){
@@ -282,8 +273,6 @@ TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedT
         tok.token[sizeof(tok.token) - 1] = '\0'; 
         tok.token_enum = ENDOFFILE;
     }
-
-    tok.token_line = number_of_lines;
 
     return tok;
 }

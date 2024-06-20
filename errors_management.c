@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "errors_management.h"
-#include "hashing.h"
+#include "aux_structs.h"
 
 // Função para criar um novo nó da lista ligada
 ErrorInfo *create_error_node(int line, int type, const char *buffer) {
@@ -24,12 +19,12 @@ ErrorInfo *create_error_node(int line, int type, const char *buffer) {
 }
 
 // Função para inserir uma palavra no final da lista ligada
-void insert_error(ErrorInfo **head, int line, int type, const char *buffer) {
-    ErrorInfo *new_node = create_error_node(line, type, buffer);
-    if (*head == NULL) {
-        *head = new_node;
+void insert_error(CompilingInfo *aux, int type, const char *buffer) {
+    ErrorInfo *new_node = create_error_node(aux->current_line, type, buffer);
+    if (*aux->error_list == NULL) {
+        *aux->error_list = new_node;
     } else {
-        ErrorInfo *current = *head;
+        ErrorInfo *current = *aux->error_list;
         while (current->next != NULL) {
             current = current->next;
         }
@@ -52,7 +47,7 @@ void printErrors(ErrorInfo *head, FILE *output_file) {
     ErrorInfo *current = head;
     while (current != NULL) {
         if (current->type == ERRO_LEXICO) fprintf(output_file, "ERRO: erro LEXICO encontrado na linha %d. Termo \"%s\" mal formado.\n", current->line, current->buffer);
-        if (current->type == ERRO_COMENTARIO_NAO_FECHADO) fprintf(output_file, "ERRO: comentario nao fechado encontrado na linha %d. Termo \"%s\" mal formado.\n", current->line, current->buffer);
+        if (current->type == ERRO_COMENTARIO_NAO_FECHADO) fprintf(output_file, "ERRO: comentario nao fechado encontrado na linha %d: \"%s\"\n", current->line, current->buffer);
         if (current->type == ERRO_SINTATICO) fprintf(output_file, "erro SINTATICO, %s. Linha %d.\n", current->buffer);
         current = current->next;        
     }
