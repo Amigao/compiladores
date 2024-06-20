@@ -7,7 +7,7 @@ END;
 
 BEGIN
    x := 1;
-   WHILE x <= 10 DO
+   WHILE  <= 10 DO
    BEGIN
       CALL square;
       x := x + @
