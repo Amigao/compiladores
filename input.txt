@@ -10,7 +10,6 @@ BEGIN
    WHILE x <= 10 DO
    BEGIN
       CALL square;
-      ! squ;
-      x := x + 1
+      x := x + @
    END
 END.

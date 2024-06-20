@@ -12,9 +12,9 @@
 #define MAX_BUF_SIZE 100
 
 typedef struct TokenInfo {
-    char *token;
+    char token[MAX_BUF_SIZE];
     int token_enum;
-    char *identifier;  
+    char identifier[MAX_BUF_SIZE];  
     int state;
     int token_line;
     bool final;
@@ -22,7 +22,7 @@ typedef struct TokenInfo {
 
 
 void build_reserved_table(Table *table);
-TokenInfo getNextToken(FILE* input_file, ErrorInfo *error_list, Table reservedTable);
+TokenInfo getNextToken(FILE* input_file, ErrorInfo **error_list, Table reservedTable);
 TokenInfo lexical_analyzer(char character, char* buffer, Table *reservedTable, int current_state);
     
 #endif

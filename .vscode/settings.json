@@ -5,6 +5,7 @@
         "lexical_analyzer.h": "c",
         "tokens_enum.h": "c",
         "stdbool.h": "c",
-        "sintatic_analyzer.h": "c"
+        "sintatic_analyzer.h": "c",
+        "stdio.h": "c"
     }
 }

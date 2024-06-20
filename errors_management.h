@@ -7,8 +7,7 @@
 
 // Definição da estrutura para um nó da lista ligada
 typedef struct ErrorInfo{
-    char *word;
-    char *message;
+    char buffer[256];
     int line;
     int type;
     struct ErrorInfo *next;
@@ -18,6 +17,6 @@ void free_error_list(ErrorInfo *head);
 
 void printErrors(ErrorInfo *head, FILE *output_file);
 
-void insert_error(ErrorInfo **head, char *word, int line, int type, char *message);
+void insert_error(ErrorInfo **head, int line, int type, const char *buffer);
 
 #endif 
