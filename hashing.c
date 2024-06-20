@@ -45,7 +45,7 @@ char *my_strdup(const char *src) {
 }
 
 // Função para inserir um par palavra-token na tabela hash
-void insert_table(Table *table, char *word, char *token){
+void insert_table(Table *table, char *word, char *token, int token_enum){
     int index = hash_function(word);
 
     Node *new_node = malloc(sizeof(Node));
@@ -56,6 +56,7 @@ void insert_table(Table *table, char *word, char *token){
 
     new_node->word = my_strdup(word);
     new_node->token = my_strdup(token);
+    new_node->token_enum = token_enum;
 
     new_node->next = NULL;
 
@@ -71,12 +72,13 @@ void insert_table(Table *table, char *word, char *token){
 }
 
 // Função de busca
-char *search_table(Table *table, char *word){
+char *search_table(Table *table, char *word, int *token_enum){
     int index = hash_function(word); 
 
     Node *current = table->table[index]; 
     while (current != NULL) { 
         if (strcmp(current->word, word) == 0) { 
+            *token_enum = current->token_enum;
             return current->token; 
         }
         current = current->next;

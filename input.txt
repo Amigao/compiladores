@@ -1,21 +1,16 @@
-CONST max = 10;
-VAR i, sum;
-PROCEDURE calculateSum ;
-  VAR temp ;
-  BEGIN
-    temp = 0 ;
-    i := 1 ;
-    WHILE i <= max DO
-      BEGIN
-        temp := temp + i ;
-        i := i + 1;
-      END ;
-    sum := temp
-  EN;
-BEGN
-  CALL calculateSum 
-  IF sum  55 THEN
-    sum = 100 ;
-  WHIE sum  0 DO
-    sum := sum - 1
-E
+VAR x, squ;
+
+PROCEDURE square;
+BEGIN
+   squ:= x * x
+END;
+
+BEGIN
+   x := 1;
+   WHILE x <= 10 DO
+   BEGIN
+      CALL square;
+      ! squ;
+      x := x + 1
+   END
+END.

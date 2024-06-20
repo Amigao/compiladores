@@ -16,12 +16,13 @@ typedef struct TokenInfo {
     int token_enum;
     char *identifier;  
     int state;
+    int token_line;
     bool final;
 } TokenInfo;
 
 
 void build_reserved_table(Table *table);
-TokenInfo getNextToken(FILE* input_file, FILE *output_file, ErrorInfo *error_list, Table reservedTable);
+TokenInfo getNextToken(FILE* input_file, ErrorInfo *error_list, Table reservedTable);
 TokenInfo lexical_analyzer(char character, char* buffer, Table *reservedTable, int current_state);
     
 #endif
