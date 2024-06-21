@@ -2,4 +2,5 @@ ERRO SINTATICO: ';' esperado apos declaracao de constante. Linha 2.
 ERRO SINTATICO: ';' esperado apos declaracao de variavel. Linha 4.
 ERRO SINTATICO: ';' esperado apos comando. Linha 9.
 ERRO LEXICO: Termo "@" mal formado. Linha 13.
-ERRO SINTATICO: ';' esperado apos comando. Linha 19.
+ERRO: comentario nao fechado encontrado na linha 21: "{é o erik melges o mai"
+ERRO SINTATICO: ';' esperado apos comando. Linha 20.

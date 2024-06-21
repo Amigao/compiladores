@@ -198,6 +198,7 @@ TokenInfo getNextToken(CompilingInfo *comp_info) {
                     insert_error(comp_info, ERRO_COMENTARIO_NAO_FECHADO, token_info.token);
                     // Reseta o estado e as variáveis
                     current_state = INITIAL_STATE;
+                    token_info.state = INITIAL_STATE;
                     buffer_index = 0;
                     buffer[buffer_index] = '\0';
                     token_info.final = false;

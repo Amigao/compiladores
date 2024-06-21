@@ -17,5 +17,6 @@ END;
 {dasdas}
 BEGIN
   n := 5       
+{é o erik melges o mai
   CALL factorial
 END.
