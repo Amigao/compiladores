@@ -70,7 +70,6 @@ bool is_valid_symbol(char c) {
 
 // Funcao de transicao de estados do automato
 int transition(int state, char c) {
-
     switch (state) {
         case 0:
             if (isalpha(c)) return 1;  // letras maiúsculas e minúsculas vão para o estado 1
@@ -145,17 +144,18 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         tok.final = true;
         
         // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
-        if (current_state == 2) {
+        if (current_state == 2 || tok.state == 2) {
             strncpy(tok.identifier, "numero", sizeof(tok.identifier) - 1);
             tok.identifier[sizeof(tok.identifier) - 1] = '\0'; 
             tok.token_enum = NUMERO; 
         }
-        else if (current_state == -1) {
-           strncpy(tok.identifier, "ERRO LEXICO", sizeof(tok.identifier) - 1);
+        else if (tok.state == -1) {
+            strncpy(tok.identifier, "ERRO LEXICO", sizeof(tok.identifier) - 1);
             tok.identifier[sizeof(tok.identifier) - 1] = '\0'; 
         } 
-        else check_reserved_table(reservedTable, &tok);
-        
+        else {
+            check_reserved_table(reservedTable, &tok);
+        }
     } else{
         // Se ainda não é estado final, acumula no buffer
         int length = strlen(tok.token);
@@ -185,9 +185,7 @@ TokenInfo getNextToken(CompilingInfo *aux){
 
         // contador de linhas
         if (c == '\n') {
-            c = ' ';
             aux->current_line++;
-            printf("linha atual: %d\n", aux->current_line);
         }
 
         // chegou no espaço ou \n indica, que acabou a token
@@ -235,8 +233,6 @@ TokenInfo getNextToken(CompilingInfo *aux){
             if(tok.state == 11){
                 buffer[i] = c;
                 buffer[i+1] = '\0';
-                // imprime o comentario que foi resetado
-                printf("\nCOMENTARIO IGNORADO: %s\n", buffer);
                 // reseta as variaveis
                 current_state = INITIAL_STATE;
                 i = 0;
@@ -257,8 +253,6 @@ TokenInfo getNextToken(CompilingInfo *aux){
                 current_state = INITIAL_STATE;
                 i = 0;
                 buffer[i] = '\0';
-
-                // printf("token %s, enum %d\n", tok.token, tok.token_enum);
                 return tok;
             } else { // se nao, continua lendo e adicionando no buffer
                 buffer[i] = c;

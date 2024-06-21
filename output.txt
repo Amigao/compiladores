@@ -1,3 +1,1 @@
-ERRO SINTATICO: ';' esperado apos declaracao de variavel. Linha 3.
-ERRO SINTATICO: 'THEN' esperado. Linha 5.
-ERRO LEXICO: Termo "@" mal formado. Linha 6.
+ERRO LEXICO: Termo "@" mal formado. Linha 13.

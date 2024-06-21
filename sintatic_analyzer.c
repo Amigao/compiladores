@@ -14,7 +14,7 @@ void panic_mode(CompilingInfo* aux, TokenType sync[], int sync_count) {
         for (i = 0; i < sync_count; i++) {
             if (tok.token_enum == (int)sync[i] || tok.token_enum == ENDOFFILE) {
                 if (tok.token_enum == ENDOFFILE) {
-                    printf("\n\nO modo de pânico consumiu ate o final do arquivo :( !!!!\n\n");
+                    printf("\n\nO modo de panico consumiu ate o final do arquivo :( !!!!\n\n");
                 }
                 return;  // Encontrou um símbolo de sincronizaçao, sai da funçao
             }
@@ -29,7 +29,7 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file) {
     CompilingInfo aux;
     aux.input_file = input_file;
     aux.error_list = &error_list;
-    aux.current_line = 1;
+    aux.current_line = 0;
 
     // Constroi tabela reservada
     build_reserved_table(&aux.reservedTable);
@@ -88,7 +88,7 @@ void constante(CompilingInfo *aux) {
 
         tok = getNextToken(aux);
         if (tok.token_enum != NUMERO) {
-            printf("Erro: Número esperado apos '='.\n");
+            printf("Erro: Numero esperado apos '='.\n");
             insert_error(aux, ERRO_SINTATICO, "Numero esperado apos '='.");
             TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
             panic_mode(aux, sync, sizeof(sync)/sizeof(sync[0]));
@@ -96,7 +96,7 @@ void constante(CompilingInfo *aux) {
         }
 
         tok = getNextToken(aux);
-        mais_cont(aux);
+        mais_const(aux);
         if (tok.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos declaracao de constante.\n");
             insert_error(aux, ERRO_SINTATICO, "';' esperado apos declaracao de constante.");
@@ -109,7 +109,7 @@ void constante(CompilingInfo *aux) {
     }
 }
 
-void mais_cont(CompilingInfo *aux) {
+void mais_const(CompilingInfo *aux) {
     if (tok.token_enum == VIRGULA) {
         tok = getNextToken(aux);
         if (tok.token_enum != IDENT) {
@@ -131,15 +131,15 @@ void mais_cont(CompilingInfo *aux) {
 
         tok = getNextToken(aux);
         if (tok.token_enum != NUMERO) {
-            printf("Erro: Número esperado apos '='.\n");
-            insert_error(aux, ERRO_SINTATICO, "Número esperado apos '='.");
+            printf("Erro: Numero esperado apos '='.\n");
+            insert_error(aux, ERRO_SINTATICO, "Numero esperado apos '='.");
             TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
             panic_mode(aux, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
 
         tok = getNextToken(aux);
-        mais_cont(aux);
+        mais_const(aux);
     }
 }
 
@@ -158,7 +158,6 @@ void variavel(CompilingInfo *aux) {
         mais_var(aux);
 
         if (tok.token_enum != PONTO_E_VIRGULA) {
-            printf("linha atual: %d\n", aux->current_line);
             printf("Erro: ';' esperado apos declaracao de variavel.\n");
             insert_error(aux, ERRO_SINTATICO, "';' esperado apos declaracao de variavel.");
             TokenType sync[] = {PONTO_E_VIRGULA, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
@@ -233,7 +232,7 @@ void comando(CompilingInfo *aux) {
             } else {
                 printf("Erro: ':=' esperado apos identificador.\n");
                 insert_error(aux, ERRO_SINTATICO, "':=' esperado apos identificador.");
-                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+                TokenType sync[] = {PONTO_E_VIRGULA, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
                 panic_mode(aux, sync, sizeof(sync)/sizeof(sync[0]));
                 return;
             }
@@ -257,6 +256,7 @@ void comando(CompilingInfo *aux) {
             mais_comando(aux);
 
             if (tok.token_enum != END) {
+                
                 printf("Erro: 'END' esperado apos bloco de comandos.\n");
                 insert_error(aux, ERRO_SINTATICO, "'END' esperado apos bloco de comandos.");
                 TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
@@ -278,7 +278,7 @@ void comando(CompilingInfo *aux) {
                 panic_mode(aux, sync, sizeof(sync)/sizeof(sync[0]));
                 return;
             }
-        
+
             tok = getNextToken(aux);
             comando(aux);
             break;
@@ -305,7 +305,13 @@ void comando(CompilingInfo *aux) {
 }
 
 void mais_comando(CompilingInfo *aux) {
-    if (tok.token_enum == PONTO_E_VIRGULA) {
+    if (tok.token_enum == IDENT) {
+        printf("Erro: ';' esperado apos comando.\n");
+        insert_error(aux, ERRO_SINTATICO, "';' esperado apos comando.");
+        comando(aux);
+        mais_comando(aux);
+    }
+    else if (tok.token_enum == PONTO_E_VIRGULA) {
         tok = getNextToken(aux);
         comando(aux);
         mais_comando(aux);
@@ -313,9 +319,14 @@ void mais_comando(CompilingInfo *aux) {
 }
 
 void condicao(CompilingInfo *aux) {
-    expressao(aux);
-    relacional(aux);
-    expressao(aux);
+    if (tok.token_enum == ODD) {
+        tok = getNextToken(aux);
+        expressao(aux);
+    } else {
+        expressao(aux);
+        relacional(aux);
+        expressao(aux);
+    }
 }
 
 void relacional(CompilingInfo *aux) {
@@ -338,8 +349,15 @@ void relacional(CompilingInfo *aux) {
 }
 
 void expressao(CompilingInfo *aux) {
+    operador_unitario(aux);
     termo(aux);
     mais_termos(aux);
+}
+
+void operador_unitario(CompilingInfo *aux){
+    if (tok.token_enum == SOMA || tok.token_enum == SUBTRACAO){
+        tok = getNextToken(aux);
+    }
 }
 
 void mais_termos(CompilingInfo *aux) {

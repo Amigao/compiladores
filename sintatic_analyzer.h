@@ -11,7 +11,7 @@ void programa(CompilingInfo *aux);
 void bloco(CompilingInfo *aux);
 void declaracao(CompilingInfo *aux);
 void constante(CompilingInfo *aux);
-void mais_cont(CompilingInfo *aux);
+void mais_const(CompilingInfo *aux);
 void variavel(CompilingInfo *aux);
 void mais_var(CompilingInfo *aux);
 void procedimento(CompilingInfo *aux);
