@@ -1,22 +1,25 @@
-const max = 10
+const
+  max = 10;
 
-var n, result
-
+var
+  n, result
 procedure factorial;
-VAR  i;
+VAR
+  i;
 BEGIN
-  result := 1;
-  i := n
+  result := @;
+  i := n;
   WHILE i > 1 DO
   BEGIN
-    result := result * i;
-    i := @ - 1
+    result := result * i
+    i := i - 1
   END
 END;
 
-{dasdas}
+{comentário com acentos e fechado corretamente ç â ô ! ^}
+{comentário com acentos e fechado de forma errônea ç â ô ! ^
+
 BEGIN
-  n := 5       
-{é o erik melges o mai
-  CALL factorial
+  n := 5;        
+  CALL factorial;
 END.

@@ -114,7 +114,7 @@ int transition(int state, char c) {
 }
 
 bool is_final_state(int state){
-    return !(state == 0 || state == 3 || state == 11);
+    return !(state == 0 || state == 3 || state == 10);
 }
 
 // Função para analisar o componente léxico da entrada
@@ -125,6 +125,7 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
     // Transição para o novo estado baseado no caractere de entrada
     int new_state = transition(current_state, character);
     token_info.state = new_state;
+
 
     // Copia o conteúdo do buffer para token_info.token de forma segura
     strncpy(token_info.token, buffer, sizeof(token_info.token) - 1);
@@ -219,6 +220,7 @@ TokenInfo getNextToken(CompilingInfo *comp_info) {
                 return token_info;
             }
         } else {
+            
             // Chama o analisador léxico para cada caractere
             token_info = lexical_analyzer(character, buffer, &comp_info->reservedTable, current_state);
 
