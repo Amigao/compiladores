@@ -42,12 +42,16 @@ void free_error_list(ErrorInfo *head) {
     }
 }
 
-// Função para liberar a memória alocada para a lista ligada
+// Função para construir o arquivo de saída
+// Os decrementos nos contadores de linha para o erro sintático e comentário não fechado são adicionados pois esses erros só são identificados quando o 
+// compilador chega na linha seguinte e não encontra o token esperado, então marcaria o erro uma linha abaixo daquela onde o erro de fato está. Isso pode
+// gerar imprecisões se variáveis ou constantes forem inicializadas de forma errada com diversas linhas vazias abaixo delas.
 void printErrors(ErrorInfo *head, FILE *output_file) {
     ErrorInfo *current = head;
+    if (current == NULL) fprintf(output_file, "CÓDIGO COMPILADO COM SUCESSO!");
     while (current != NULL) {
         if (current->type == ERRO_LEXICO) fprintf(output_file, "ERRO LEXICO: Termo \"%s\" mal formado. Linha %d.\n", current->buffer, current->line);
-        if (current->type == ERRO_COMENTARIO_NAO_FECHADO) fprintf(output_file, "ERRO: comentario nao fechado encontrado na linha %d: \"%s\"\n", current->line, current->buffer);
+        if (current->type == ERRO_COMENTARIO_NAO_FECHADO) fprintf(output_file, "ERRO: comentario nao fechado encontrado na linha %d: \"%s\"\n", current->line - 1, current->buffer);
         if (current->type == ERRO_SINTATICO) fprintf(output_file, "ERRO SINTATICO: %s Linha %d.\n", current->buffer, current->line - 1);
         current = current->next;        
     }

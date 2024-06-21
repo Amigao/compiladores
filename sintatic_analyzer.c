@@ -34,6 +34,7 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file) {
     // Constroi tabela reservada
     build_reserved_table(&comp_info.reservedTable);
 
+    // NÓ RAÍZ
     programa(&comp_info);
 
     // Imprime os erros encontrados

@@ -1,4 +1,4 @@
 ERRO SINTATICO: ';' esperado apos declaracao de variavel. Linha 5.
 ERRO LEXICO: Termo "@" mal formado. Linha 10.
 ERRO SINTATICO: ';' esperado apos comando. Linha 14.
-ERRO: comentario nao fechado encontrado na linha 21: "{comentário com acentos e fechado de forma errônea ç â ô ! ^"
+ERRO: comentario nao fechado encontrado na linha 20: "{comentário com acentos e fechado de forma errônea ç â ô ! ^"
