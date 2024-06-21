@@ -1,8 +1,5 @@
-erro SINTATICO, ERRO: fator invalido.. Linha -1928279760.
-erro SINTATICO, ERRO: operador relacional esperado.. Linha -1928279760.
-erro SINTATICO, ERRO: fator invalido.. Linha -1928279760.
-erro SINTATICO, ERRO: 'DO' esperado.. Linha -1928279760.
-erro SINTATICO, ERRO: 'END' esperado para finalizar 'BEGIN'.. Linha -1928279760.
-erro SINTATICO, ERRO: '.' esperado no final do programa.. Linha -1928279760.
-ERRO: erro LEXICO encontrado na linha 14. Termo "@" mal formado.
-ERRO: erro LEXICO encontrado na linha 16. Termo "" mal formado.
+erro SINTATICO, ERRO: ';' esperado apos declaracao de variavel.. Linha 347548072.
+erro SINTATICO, ERRO: 'END' esperado para finalizar 'BEGIN'.. Linha 347548072.
+erro SINTATICO, ERRO: ';' esperado apos comando.. Linha 347548072.
+erro SINTATICO, ERRO: '.' esperado no final do programa.. Linha 347548072.
+ERRO: erro LEXICO encontrado na linha 6. Termo "@" mal formado.

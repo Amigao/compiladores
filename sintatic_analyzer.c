@@ -5,39 +5,27 @@ TokenInfo tok;
 Table reservedTable;
 ErrorInfo *error_list = NULL;
 
-/*
- *
-void panic_mode(CompilingInfo *aux, TokenType sync){
-    while(tok.token_enum != (int)sync && tok.token_enum != ENDOFFILE){
-        tok = getNextToken(aux);
-    }
-    if(tok.token_enum != ENDOFFILE){
-        tok = getNextToken(aux);
-    }
-    else{
-        printf("\n\nO modo de panico consumiu ate o final do arquivo :( \n\n");
-        exit(0);
-    }
-}
- */
 
-void panic_mode(CompilingInfo*aux,  TokenType sync[], int sync_count) {
+void panic_mode(CompilingInfo* aux, TokenType sync[], int sync_count) {
     int i;
     while (1) {
+        //printf("Panic mode: consumindo token %d\n", tok.token_enum); // Monitorando tokens
+
+        // Verifica se o token atual é um token de sincronização
         for (i = 0; i < sync_count; i++) {
             if (tok.token_enum == (int)sync[i] || tok.token_enum == ENDOFFILE) {
-                if (tok.token_enum != ENDOFFILE) {
-                    tok = getNextToken(aux);
-                } else {
+                if (tok.token_enum == ENDOFFILE) {
                     printf("\n\nO modo de pânico consumiu até o final do arquivo :( !!!!\n\n");
                     exit(-1);
                 }
-                return;
+                return;  // Encontrou um símbolo de sincronização, sai da função
             }
         }
-        tok = getNextToken(aux);
+
+        tok = getNextToken(aux);  // Continua consumindo tokens até encontrar um símbolo de sincronização
     }
 }
+
 void sintatic_analyzer(FILE *input_file, FILE *output_file){
     CompilingInfo aux;
     aux.input_file = input_file;
@@ -64,16 +52,23 @@ void programa(CompilingInfo *aux){
     if (tok.token_enum != PONTO) {
         // Erro: token inesperado
         printf("Erro: '.' esperado no final do programa.\n");
-        TokenType sync[] = {PONTO, ENDOFFILE};
         insert_error(aux, ERRO_SINTATICO, "ERRO: '.' esperado no final do programa.");
+        TokenType sync[] = {PONTO, ENDOFFILE, BEGIN, END};
         panic_mode(aux, sync, sizeof(sync)/sizeof(sync[0]));
         return;
     }
 }
 
-void bloco(CompilingInfo *aux){
+void bloco(CompilingInfo *aux) {
     declaracao(aux);
     comando(aux);
+    if (tok.token_enum != PONTO_E_VIRGULA && tok.token_enum != ENDOFFILE) {
+        printf("Erro: ';' esperado apos comando.\n");
+        insert_error(aux, ERRO_SINTATICO, "ERRO: ';' esperado apos comando.");
+        TokenType sync[] = {PONTO_E_VIRGULA, BEGIN, END, ENDOFFILE};
+        panic_mode(aux, sync, sizeof(sync)/sizeof(sync[0]));
+        return;
+    }
 }
 
 void declaracao(CompilingInfo *aux){
@@ -239,7 +234,8 @@ void procedimento(CompilingInfo *aux){
     }
 }
 
-void comando(CompilingInfo *aux){
+
+void comando(CompilingInfo *aux) {
     if (tok.token_enum == IDENT) {
         tok = getNextToken(aux);
 
@@ -266,7 +262,7 @@ void comando(CompilingInfo *aux){
     } else if (tok.token_enum == BEGIN) {
         tok = getNextToken(aux);
         comando(aux);
-        
+
         mais_comando(aux);
         if (tok.token_enum != END) {
             printf("Erro: 'END' esperado.\n");
@@ -279,6 +275,7 @@ void comando(CompilingInfo *aux){
     } else if (tok.token_enum == IF) {
         tok = getNextToken(aux);
         condicao(aux);
+            printf("Erro: 'THEN' esperado.\n");
         if (tok.token_enum != THEN) {
             printf("Erro: 'THEN' esperado.\n");
             insert_error(aux, ERRO_SINTATICO, "ERRO: 'THEN' esperado.");
