@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "hashing.h"
 
@@ -71,13 +72,26 @@ void insert_table(Table *table, char *word, char *token, int token_enum){
     }
 }
 
+// Função auxiliar para converter uma string para maiúsculas
+void to_uppercase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = toupper((unsigned char)str[i]);
+    }
+}
+
 // Função de busca
 char *search_table(Table *table, char *word, int *token_enum){
-    int index = hash_function(word); 
+    // Converte a palavra buscada para maiúsculas
+    char upper_word[100];
+    strncpy(upper_word, word, sizeof(upper_word) - 1);
+    upper_word[sizeof(upper_word) - 1] = '\0';
+    to_uppercase(upper_word);
+
+    int index = hash_function(upper_word); 
 
     Node *current = table->table[index]; 
     while (current != NULL) { 
-        if (strcmp(current->word, word) == 0) { 
+        if (strcmp(current->word, upper_word) == 0) { 
             *token_enum = current->token_enum;
             return current->token; 
         }
