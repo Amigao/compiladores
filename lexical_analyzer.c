@@ -185,7 +185,9 @@ TokenInfo getNextToken(CompilingInfo *aux){
 
         // contador de linhas
         if (c == '\n') {
+            c = ' ';
             aux->current_line++;
+            printf("linha atual: %d\n", aux->current_line);
         }
 
         // chegou no espaço ou \n indica, que acabou a token
@@ -210,8 +212,10 @@ TokenInfo getNextToken(CompilingInfo *aux){
             }
             
             if(tok.final){
+                
                 if (tok.state == -1){
                     insert_error(aux, ERRO_LEXICO, tok.token);
+                    tok.token_enum = IDENT;
                 }
                 //volta para o estado incial e reseta as Variaveis
                 current_state = INITIAL_STATE;
@@ -244,6 +248,7 @@ TokenInfo getNextToken(CompilingInfo *aux){
             else if (tok.state == RETURN_STATE) {
                 if (current_state == -1){
                     insert_error(aux, ERRO_LEXICO, tok.token);
+                    tok.token_enum = IDENT;
                 }
                 
                 // devolve o caractere pra cadeia de entrada
@@ -264,9 +269,10 @@ TokenInfo getNextToken(CompilingInfo *aux){
         }
     }
     
-    if(!is_final_state(tok.state)){
-        insert_error(aux, ERRO_LEXICO, buffer);
-    }
+    // if(!is_final_state(tok.state)){
+    //     insert_error(aux, ERRO_LEXICO, buffer);
+    //     tok.token_enum = IDENT;
+    // }
     
     if (i == 0){
         strncpy(tok.token, "EOF", sizeof(tok.token) - 1);

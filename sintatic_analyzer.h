@@ -22,7 +22,7 @@ void operador_unitario(CompilingInfo *aux);
 void termo(CompilingInfo *aux);
 void mais_termos(CompilingInfo *aux);
 void fator(CompilingInfo *aux);
-void mais_fatores(CompilingInfo *aux);
+void mais_fator(CompilingInfo *aux);
 void condicao(CompilingInfo *aux);
 void relacional(CompilingInfo *aux);
 
