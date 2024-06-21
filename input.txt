@@ -1,8 +1,7 @@
-VAR MicHel123,b,cdsadas;
-{comentario correto}
-    {comentario errado
+VAR a,b,c
 BEGIN
-    b:=3x;
-    c:=@+b;
-    dlaspdla&spd;
+    a:=2;
+    IF a>2
+        b:=3;
+    c:=@+b
 END.

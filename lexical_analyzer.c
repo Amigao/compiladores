@@ -1,26 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
-#include "tokens_enum.h"
 #include "lexical_analyzer.h"
-#include "hashing.h"
 
 // Funcao para checar se o token esta na tabela de palavras e simbolos reservados
 void check_reserved_table(Table *table, TokenInfo *tok) {
-    char *result = search_table(table, tok->token);
+    char *result = search_table(table, tok->token, &tok->token_enum);
     if (result != NULL) {
-        tok->identifier = result;
-        // Atribuir o enum correspondente ao token encontrado
-        for (int i = 0; i < TOKEN_COUNT; i++) {
-            if (strcmp(result, TokenTypeStrings[i]) == 0) {
-                tok->token_enum = (TokenType)i;
-                break;
-            }
-        }
+        strncpy(tok->identifier, result, sizeof(tok->identifier) - 1);
+        tok->identifier[sizeof(tok->identifier) - 1] = '\0'; 
+
     } else {
-        tok->identifier = "ident";
+        strncpy(tok->identifier, "ident", sizeof(tok->identifier) - 1);
+        tok->identifier[sizeof(tok->identifier) - 1] = '\0'; 
+
         tok->token_enum = IDENT;
     }
 }
@@ -28,33 +18,33 @@ void check_reserved_table(Table *table, TokenInfo *tok) {
 // Adiciona palavras e simbolos reservados na tabela
 void build_reserved_table(Table *table){
     initialize_table(table);
-    insert_table(table, "CONST",  "<CONST>");
-    insert_table(table, "VAR", "<VAR>");
-    insert_table(table, "PROCEDURE", "<PROCEDURE>");
-    insert_table(table, "BEGIN", "<BEGIN>");
-    insert_table(table, "END", "<END>");
-    insert_table(table, "CALL", "<CALL>");
-    insert_table(table, "IF", "<IF>");
-    insert_table(table, "THEN", "<THEN>");
-    insert_table(table, "WHILE", "<WHILE>");
-    insert_table(table, "DO", "<DO>");
-    insert_table(table, "ODD", "<ODD>");
-    insert_table(table, "+", "<SIMBOLO_SOMA>");
-    insert_table(table, "-", "<SIMBOLO_SUBTRACAO>");
-    insert_table(table, "*", "<SIMBOLO_MULTIPLICACAO>");
-    insert_table(table, "/", "<SIMBOLO_DIVISAO>");
-    insert_table(table, "=", "<SIMBOLO_IGUAL>");
-    insert_table(table, "<>", "<SIMBOLO_DIFERENTE>");
-    insert_table(table, "<", "<SIMBOLO_MENOR>");
-    insert_table(table, "<=", "<SIMBOLO_MENOR_IGUAL>");
-    insert_table(table, ">", "<SIMBOLO_MAIOR>");
-    insert_table(table, ">=", "<SIMBOLO_MAIOR_IGUAL>");
-    insert_table(table, ":=", "<SIMBOLO_ATRIBUICAO>");
-    insert_table(table, "(", "<PARENTESE_ESQUERDA>");
-    insert_table(table, ")", "<PARENTESE_DIREITA>");
-    insert_table(table, ",", "<VIRGULA>");
-    insert_table(table, ";", "<PONTO_E_VIRGULA>");
-    insert_table(table, ".", "<PONTO>");
+    insert_table(table, "CONST", "CONST", CONST);
+    insert_table(table, "VAR", "VAR", VAR);
+    insert_table(table, "PROCEDURE", "PROCEDURE", PROCEDURE);
+    insert_table(table, "BEGIN", "BEGIN", BEGIN);
+    insert_table(table, "END", "END", END);
+    insert_table(table, "CALL", "CALL", CALL);
+    insert_table(table, "IF", "IF", IF);
+    insert_table(table, "THEN", "THEN", THEN);
+    insert_table(table, "WHILE", "WHILE", WHILE);
+    insert_table(table, "DO", "DO", DO);
+    insert_table(table, "ODD", "ODD", ODD);
+    insert_table(table, "+", "SOMA", SOMA);
+    insert_table(table, "-", "SUBTRACAO", SUBTRACAO);
+    insert_table(table, "*", "MULTIPLICACAO", MULTIPLICACAO);
+    insert_table(table, "/", "DIVISAO", DIVISAO);
+    insert_table(table, "=", "IGUAL", IGUAL);
+    insert_table(table, "<>", "DIFERENTE", DIFERENTE);
+    insert_table(table, "<", "MENOR", MENOR);
+    insert_table(table, "<=", "MENOR_IGUAL", MENOR_IGUAL);
+    insert_table(table, ">", "MAIOR", MAIOR);
+    insert_table(table, ">=", "MAIOR_IGUAL", MAIOR_IGUAL);
+    insert_table(table, ":=", "ATRIBUICAO", ATRIBUICAO);
+    insert_table(table, "(", "PARENTESE_ESQUERDA", PARENTESE_ESQUERDA);
+    insert_table(table, ")", "PARENTESE_DIREITA", PARENTESE_DIREITA);
+    insert_table(table, ",", "VIRGULA", VIRGULA);
+    insert_table(table, ";", "PONTO_E_VIRGULA", PONTO_E_VIRGULA);
+    insert_table(table, ".", "PONTO", PONTO);
 }
 
 // Funcoes auxiliares para conferir o estado do automato 
@@ -136,7 +126,10 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
     // Faz a transicao no automato baseado no caracter de entrada
     int new_state = transition(current_state, character);
     tok.state = new_state;
-    tok.token = buffer;
+    
+    strncpy(tok.token, buffer, sizeof(tok.token) - 1);
+    tok.token[sizeof(tok.token) - 1] = '\0'; 
+    // tok.token = buffer;
 
     //se esta em um possivel estado final
     if (is_final_state(new_state)){
@@ -152,12 +145,140 @@ TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, i
         tok.final = true;
         
         // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
-        if (current_state == 2) tok.identifier = my_strdup("number");
-        else if (current_state == -1) tok.identifier = my_strdup("ERRO LEXICO");
+        if (current_state == 2) {
+            strncpy(tok.identifier, "numero", sizeof(tok.identifier) - 1);
+            tok.identifier[sizeof(tok.identifier) - 1] = '\0'; 
+            tok.token_enum = NUMERO; 
+        }
+        else if (current_state == -1) {
+           strncpy(tok.identifier, "ERRO LEXICO", sizeof(tok.identifier) - 1);
+            tok.identifier[sizeof(tok.identifier) - 1] = '\0'; 
+        } 
         else check_reserved_table(reservedTable, &tok);
         
+    } else{
+        // Se ainda não é estado final, acumula no buffer
+        int length = strlen(tok.token);
+        tok.token[length] = character;
+        tok.token[length + 1] = '\0';
+    }
+    // retorna o par token/classe
+    return tok;
+}
+
+
+TokenInfo getNextToken(CompilingInfo *aux){
+    TokenInfo tok;
+    (void)memset(&tok, 0, sizeof(TokenInfo));
+
+    // Estado inicial do automato
+    int current_state = INITIAL_STATE;
+
+    // Variaveis para percorrer o arquivo e guardar token/classe 
+    char c;
+    char buffer[MAX_BUF_SIZE];
+    int i = 0;
+    buffer[0] = '\0'; 
+
+    // Enquanto nao acabar o arquivo
+    while ((c = fgetc(aux->input_file)) != EOF) {
+
+        // contador de linhas
+        if (c == '\n') {
+            c = ' ';
+            aux->current_line++;
+            printf("linha atual: %d\n", aux->current_line);
+        }
+
+        // chegou no espaço ou \n indica, que acabou a token
+        if (c == ' ' || c == '\n') {
+
+            if(tok.state == 10){
+                if(c == ' ') {
+                    buffer[i] = c;
+                    buffer[i + 1] = '\0';
+                    current_state = tok.state;
+                    i++;
+                    continue;
+                } else {
+                    insert_error(aux, ERRO_COMENTARIO_NAO_FECHADO, tok.token);
+                    //volta para o estado incial e reseta as Variaveis
+                    current_state = INITIAL_STATE;
+                    i = 0;
+                    buffer[i] = '\0';
+                    tok.final = false;
+                    continue;
+                }
+            }
+            
+            if(tok.final){
+                
+                if (tok.state == -1){
+                    insert_error(aux, ERRO_LEXICO, tok.token);
+                    tok.token_enum = IDENT;
+                }
+                //volta para o estado incial e reseta as Variaveis
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
+                tok.final = false;
+                // printf("token %s, enum %d\n", tok.token, tok.token_enum);
+                return tok;
+            }
+
+        } else {
+
+            // chama o lexico para cada caracter
+            tok = lexical_analyzer(c, buffer, &aux->reservedTable, current_state);
+            
+            // se entrar no estado de comentario
+            if(tok.state == 11){
+                buffer[i] = c;
+                buffer[i+1] = '\0';
+                // imprime o comentario que foi resetado
+                printf("\nCOMENTARIO IGNORADO: %s\n", buffer);
+                // reseta as variaveis
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
+                tok.final = false;
+            }
+            
+            // Se entrou no estado de retroceder
+            else if (tok.state == RETURN_STATE) {
+                if (current_state == -1){
+                    insert_error(aux, ERRO_LEXICO, tok.token);
+                    tok.token_enum = IDENT;
+                }
+                
+                // devolve o caractere pra cadeia de entrada
+                ungetc(c, aux->input_file);
+                // reseta as variaveis
+                current_state = INITIAL_STATE;
+                i = 0;
+                buffer[i] = '\0';
+
+                // printf("token %s, enum %d\n", tok.token, tok.token_enum);
+                return tok;
+            } else { // se nao, continua lendo e adicionando no buffer
+                buffer[i] = c;
+                buffer[i + 1] = '\0';
+                current_state = tok.state;
+                i++;
+            }
+        }
+    }
+    
+    // if(!is_final_state(tok.state)){
+    //     insert_error(aux, ERRO_LEXICO, buffer);
+    //     tok.token_enum = IDENT;
+    // }
+    
+    if (i == 0){
+        strncpy(tok.token, "EOF", sizeof(tok.token) - 1);
+        tok.token[sizeof(tok.token) - 1] = '\0'; 
+        tok.token_enum = ENDOFFILE;
     }
 
-    // retorna o par token/classe
     return tok;
 }

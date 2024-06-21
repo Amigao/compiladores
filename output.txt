@@ -1,22 +1,3 @@
-VAR, <VAR>
-MicHel123, ident
-,, <VIRGULA>
-b, ident
-,, <VIRGULA>
-cdsadas, ident
-;, <PONTO_E_VIRGULA>
-BEGIN, <BEGIN>
-b, ident
-:=, <SIMBOLO_ATRIBUICAO>
-3x, ERRO LEXICO
-;, <PONTO_E_VIRGULA>
-c, ident
-:=, <SIMBOLO_ATRIBUICAO>
-@, ERRO LEXICO
-+, <SIMBOLO_SOMA>
-b, ident
-;, <PONTO_E_VIRGULA>
-dlaspdla&spd, ERRO LEXICO
-;, <PONTO_E_VIRGULA>
-END, <END>
-., <PONTO>
+ERRO SINTATICO: ';' esperado apos declaracao de variavel. Linha 3.
+ERRO SINTATICO: 'THEN' esperado. Linha 5.
+ERRO LEXICO: Termo "@" mal formado. Linha 6.

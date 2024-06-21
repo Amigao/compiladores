@@ -9,6 +9,7 @@
 typedef struct Node {
     char *word;
     char *token;
+    int token_enum;
     struct Node *next;
 } Node;
 
@@ -21,9 +22,9 @@ int hash_function(char *word);
 
 void initialize_table(Table *table);
 
-void insert_table(Table *table, char *word, char *token);
+void insert_table(Table *table, char *word, char *token, int token_enum);
 
-char *search_table(Table *table, char *word);
+char *search_table(Table *table, char *word, int *token_enum);
 
 void free_table(Table *table);
 
