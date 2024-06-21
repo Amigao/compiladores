@@ -117,162 +117,148 @@ bool is_final_state(int state){
     return !(state == 0 || state == 3 || state == 11);
 }
 
-// Funcao que sera chamada pelo sintatico
-TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state){
-    TokenInfo tok;
-    tok.final = false;
+// Função para analisar o componente léxico da entrada
+TokenInfo lexical_analyzer(char character, char *buffer, Table* reservedTable, int current_state) {
+    TokenInfo token_info;
+    token_info.final = false;
 
-    // Faz a transicao no automato baseado no caracter de entrada
+    // Transição para o novo estado baseado no caractere de entrada
     int new_state = transition(current_state, character);
-    tok.state = new_state;
-    
-    strncpy(tok.token, buffer, sizeof(tok.token) - 1);
-    tok.token[sizeof(tok.token) - 1] = '\0'; 
-    // tok.token = buffer;
+    token_info.state = new_state;
 
-    //se esta em um possivel estado final
-    if (is_final_state(new_state)){
+    // Copia o conteúdo do buffer para token_info.token de forma segura
+    strncpy(token_info.token, buffer, sizeof(token_info.token) - 1);
+    token_info.token[sizeof(token_info.token) - 1] = '\0';
 
-        int length = strlen(tok.token);
-        if(new_state == RETURN_STATE){ // se for estado de retroceder, não adiciona o caracter da cadeia no token lido
-            tok.token[length] = '\0';
+    // Se estiver em um possível estado final
+    if (is_final_state(new_state)) {
+        int length = strlen(token_info.token);
+        if (new_state == RETURN_STATE) { // Se o estado for de retorno, não adiciona o caractere ao token
+            token_info.token[length] = '\0';
         } else {
-            tok.token[length] = character;
-            tok.token[length + 1] = '\0';
+            token_info.token[length] = character;
+            token_info.token[length + 1] = '\0';
         }
 
-        tok.final = true;
-        
-        // Confere se eh um numero, erro ou se esta na tabela de palavras e simbolos reservados
-        if (current_state == 2 || tok.state == 2) {
-            strncpy(tok.identifier, "numero", sizeof(tok.identifier) - 1);
-            tok.identifier[sizeof(tok.identifier) - 1] = '\0'; 
-            tok.token_enum = NUMERO; 
+        token_info.final = true;
+
+        // Verifica se é um número, erro ou se está na tabela de palavras reservadas
+        if (current_state == 2 || token_info.state == 2) {
+            strncpy(token_info.identifier, "numero", sizeof(token_info.identifier) - 1);
+            token_info.identifier[sizeof(token_info.identifier) - 1] = '\0';
+            token_info.token_enum = NUMERO;
+        } else if (token_info.state == -1) {
+            strncpy(token_info.identifier, "ERRO LÉXICO", sizeof(token_info.identifier) - 1);
+            token_info.identifier[sizeof(token_info.identifier) - 1] = '\0';
+        } else {
+            check_reserved_table(reservedTable, &token_info);
         }
-        else if (tok.state == -1) {
-            strncpy(tok.identifier, "ERRO LEXICO", sizeof(tok.identifier) - 1);
-            tok.identifier[sizeof(tok.identifier) - 1] = '\0'; 
-        } 
-        else {
-            check_reserved_table(reservedTable, &tok);
-        }
-    } else{
-        // Se ainda não é estado final, acumula no buffer
-        int length = strlen(tok.token);
-        tok.token[length] = character;
-        tok.token[length + 1] = '\0';
+    } else {
+        // Se não estiver em um estado final, acumula no buffer
+        int length = strlen(token_info.token);
+        token_info.token[length] = character;
+        token_info.token[length + 1] = '\0';
     }
-    // retorna o par token/classe
-    return tok;
+
+    // Retorna o par token/classe
+    return token_info;
 }
 
+// Função para obter o próximo token da entrada
+TokenInfo getNextToken(CompilingInfo *comp_info) {
+    TokenInfo token_info;
+    memset(&token_info, 0, sizeof(TokenInfo));
 
-TokenInfo getNextToken(CompilingInfo *aux){
-    TokenInfo tok;
-    (void)memset(&tok, 0, sizeof(TokenInfo));
-
-    // Estado inicial do automato
+    // Estado inicial do autômato
     int current_state = INITIAL_STATE;
 
-    // Variaveis para percorrer o arquivo e guardar token/classe 
-    char c;
+    // Variáveis para percorrer o arquivo e armazenar token/classe
+    char character;
     char buffer[MAX_BUF_SIZE];
-    int i = 0;
-    buffer[0] = '\0'; 
+    int buffer_index = 0;
+    buffer[0] = '\0';
 
-    // Enquanto nao acabar o arquivo
-    while ((c = fgetc(aux->input_file)) != EOF) {
-
-        // contador de linhas
-        if (c == '\n') {
-            aux->current_line++;
+    // Enquanto não for o fim do arquivo
+    while ((character = fgetc(comp_info->input_file)) != EOF) {
+        // Contador de linhas
+        if (character == '\n') {
+            comp_info->current_line++;
         }
 
-        // chegou no espaço ou \n indica, que acabou a token
-        if (c == ' ' || c == '\n') {
-
-            if(tok.state == 10){
-                if(c == ' ') {
-                    buffer[i] = c;
-                    buffer[i + 1] = '\0';
-                    current_state = tok.state;
-                    i++;
+        // Se espaço ou nova linha indica fim do token
+        if (character == ' ' || character == '\n') {
+            if (token_info.state == 10) {
+                if (character == ' ') {
+                    buffer[buffer_index] = character;
+                    buffer[buffer_index + 1] = '\0';
+                    current_state = token_info.state;
+                    buffer_index++;
                     continue;
                 } else {
-                    insert_error(aux, ERRO_COMENTARIO_NAO_FECHADO, tok.token);
-                    //volta para o estado incial e reseta as Variaveis
+                    insert_error(comp_info, ERRO_COMENTARIO_NAO_FECHADO, token_info.token);
+                    // Reseta o estado e as variáveis
                     current_state = INITIAL_STATE;
-                    i = 0;
-                    buffer[i] = '\0';
-                    tok.final = false;
+                    buffer_index = 0;
+                    buffer[buffer_index] = '\0';
+                    token_info.final = false;
                     continue;
                 }
             }
-            
-            if(tok.final){
-                
-                if (tok.state == -1){
-                    insert_error(aux, ERRO_LEXICO, tok.token);
-                    tok.token_enum = IDENT;
-                }
-                //volta para o estado incial e reseta as Variaveis
-                current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-                tok.final = false;
-                // printf("token %s, enum %d\n", tok.token, tok.token_enum);
-                return tok;
-            }
 
+            if (token_info.final) {
+                if (token_info.state == -1) {
+                    insert_error(comp_info, ERRO_LEXICO, token_info.token);
+                    token_info.token_enum = IDENT;
+                }
+                // Reseta o estado e as variáveis
+                current_state = INITIAL_STATE;
+                buffer_index = 0;
+                buffer[buffer_index] = '\0';
+                token_info.final = false;
+                return token_info;
+            }
         } else {
+            // Chama o analisador léxico para cada caractere
+            token_info = lexical_analyzer(character, buffer, &comp_info->reservedTable, current_state);
 
-            // chama o lexico para cada caracter
-            tok = lexical_analyzer(c, buffer, &aux->reservedTable, current_state);
-            
-            // se entrar no estado de comentario
-            if(tok.state == 11){
-                buffer[i] = c;
-                buffer[i+1] = '\0';
-                // reseta as variaveis
+            // Se entrou no estado de comentário
+            if (token_info.state == 11) {
+                buffer[buffer_index] = character;
+                buffer[buffer_index + 1] = '\0';
+                // Reseta o estado e as variáveis
                 current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-                tok.final = false;
+                buffer_index = 0;
+                buffer[buffer_index] = '\0';
+                token_info.final = false;
             }
-            
-            // Se entrou no estado de retroceder
-            else if (tok.state == RETURN_STATE) {
-                if (current_state == -1){
-                    insert_error(aux, ERRO_LEXICO, tok.token);
-                    tok.token_enum = IDENT;
+            // Se entrou no estado de retorno
+            else if (token_info.state == RETURN_STATE) {
+                if (current_state == -1) {
+                    insert_error(comp_info, ERRO_LEXICO, token_info.token);
+                    token_info.token_enum = IDENT;
                 }
-                
-                // devolve o caractere pra cadeia de entrada
-                ungetc(c, aux->input_file);
-                // reseta as variaveis
+                // Devolve o caractere para a cadeia de entrada
+                ungetc(character, comp_info->input_file);
+                // Reseta o estado e as variáveis
                 current_state = INITIAL_STATE;
-                i = 0;
-                buffer[i] = '\0';
-                return tok;
-            } else { // se nao, continua lendo e adicionando no buffer
-                buffer[i] = c;
-                buffer[i + 1] = '\0';
-                current_state = tok.state;
-                i++;
+                buffer_index = 0;
+                buffer[buffer_index] = '\0';
+                return token_info;
+            } else { // Caso contrário, continua lendo e adicionando no buffer
+                buffer[buffer_index] = character;
+                buffer[buffer_index + 1] = '\0';
+                current_state = token_info.state;
+                buffer_index++;
             }
         }
     }
-    
-    // if(!is_final_state(tok.state)){
-    //     insert_error(aux, ERRO_LEXICO, buffer);
-    //     tok.token_enum = IDENT;
-    // }
-    
-    if (i == 0){
-        strncpy(tok.token, "EOF", sizeof(tok.token) - 1);
-        tok.token[sizeof(tok.token) - 1] = '\0'; 
-        tok.token_enum = ENDOFFILE;
+
+    // Se o buffer estiver vazio, retorna token EOF
+    if (buffer_index == 0) {
+        strncpy(token_info.token, "EOF", sizeof(token_info.token) - 1);
+        token_info.token[sizeof(token_info.token) - 1] = '\0';
+        token_info.token_enum = ENDOFFILE;
     }
 
-    return tok;
+    return token_info;
 }

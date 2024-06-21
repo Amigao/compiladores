@@ -46,9 +46,9 @@ void free_error_list(ErrorInfo *head) {
 void printErrors(ErrorInfo *head, FILE *output_file) {
     ErrorInfo *current = head;
     while (current != NULL) {
-        if (current->type == ERRO_LEXICO) fprintf(output_file, "ERRO LEXICO: Termo \"%s\" mal formado. Linha %d.\n", current->buffer, current->line + 1);
+        if (current->type == ERRO_LEXICO) fprintf(output_file, "ERRO LEXICO: Termo \"%s\" mal formado. Linha %d.\n", current->buffer, current->line);
         if (current->type == ERRO_COMENTARIO_NAO_FECHADO) fprintf(output_file, "ERRO: comentario nao fechado encontrado na linha %d: \"%s\"\n", current->line, current->buffer);
-        if (current->type == ERRO_SINTATICO) fprintf(output_file, "ERRO SINTATICO: %s Linha %d.\n", current->buffer, current->line);
+        if (current->type == ERRO_SINTATICO) fprintf(output_file, "ERRO SINTATICO: %s Linha %d.\n", current->buffer, current->line - 1);
         current = current->next;        
     }
 }

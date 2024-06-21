@@ -1,1 +1,4 @@
+ERRO SINTATICO: ';' esperado apos declaracao de constante. Linha 2.
+ERRO SINTATICO: ';' esperado apos declaracao de variavel. Linha 4.
 ERRO LEXICO: Termo "@" mal formado. Linha 13.
+ERRO SINTATICO: ';' esperado apos comando. Linha 19.

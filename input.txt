@@ -1,6 +1,6 @@
-CONST max = 10;
+CONST max = 10
 
-VAR n, result;
+VAR n, result
 
 PROCEDURE factorial;
 VAR  i;
@@ -16,6 +16,6 @@ END;
 
 {dasdas}
 BEGIN
-  n := 5;        
-  CALL factorial;
+  n := 5       
+  CALL factorial
 END.
