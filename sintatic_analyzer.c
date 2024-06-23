@@ -2,8 +2,7 @@
 
 //struct para guardar token/classe
 TokenInfo token_info;
-Table reservedTable;
-ErrorInfo *error_list = NULL;
+FILE *output_file_panic_errors;     // variavel global usada somente quando o modo panico consome todo o arquivo 
 
 void panic_mode(CompilingInfo* comp_info, TokenType sync[], int sync_count) {
     int i;
@@ -15,6 +14,8 @@ void panic_mode(CompilingInfo* comp_info, TokenType sync[], int sync_count) {
             if (token_info.token_enum == (int)sync[i] || token_info.token_enum == ENDOFFILE) {
                 if (token_info.token_enum == ENDOFFILE) {
                     printf("\n\nO modo de panico consumiu ate o final do arquivo :( !!!!\n\n");
+                    printErrors(*comp_info->error_list, output_file_panic_errors);
+                    exit(0);
                 }
                 return;  // Encontrou um símbolo de sincronizaçao, sai da funçao
             }
@@ -26,6 +27,9 @@ void panic_mode(CompilingInfo* comp_info, TokenType sync[], int sync_count) {
 }
 
 void sintatic_analyzer(FILE *input_file, FILE *output_file) {
+    output_file_panic_errors = output_file;
+    
+    ErrorInfo *error_list = NULL;
     CompilingInfo comp_info;
     comp_info.input_file = input_file;
     comp_info.error_list = &error_list;
@@ -38,11 +42,11 @@ void sintatic_analyzer(FILE *input_file, FILE *output_file) {
     programa(&comp_info);
 
     // Imprime os erros encontrados
-    printErrors(error_list, output_file);
+    printErrors(*comp_info.error_list, output_file);
     
     // Libera as tabelas e listas utilizadas
-    free_error_list(error_list);
-    free_table(&reservedTable);
+    free_error_list(*comp_info.error_list);
+    free_table(&comp_info.reservedTable);
 }
 
 void programa(CompilingInfo *comp_info) {
@@ -51,7 +55,7 @@ void programa(CompilingInfo *comp_info) {
     if (token_info.token_enum != PONTO) {
         printf("Erro: '.' esperado no final do programa.\n");
         insert_error(comp_info, ERRO_SINTATICO, "'.' esperado no final do programa.");
-        TokenType sync[] = {PONTO, ENDOFFILE, BEGIN, END};
+        TokenType sync[] = {PONTO, BEGIN, END};
         panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
         return;
     }
@@ -74,7 +78,7 @@ void constante(CompilingInfo *comp_info) {
         if (token_info.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos 'CONST'.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Identificador esperado apos 'CONST'.");
-            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -82,7 +86,7 @@ void constante(CompilingInfo *comp_info) {
         token_info = getNextToken(comp_info);
         if (token_info.token_enum != IGUAL) {
             printf("Erro: '=' esperado apos identificador.\n");
-            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -91,7 +95,7 @@ void constante(CompilingInfo *comp_info) {
         if (token_info.token_enum != NUMERO) {
             printf("Erro: Numero esperado apos '='.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Numero esperado apos '='.");
-            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -101,7 +105,7 @@ void constante(CompilingInfo *comp_info) {
         if (token_info.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos declaracao de constante.\n");
             insert_error(comp_info, ERRO_SINTATICO, "';' esperado apos declaracao de constante.");
-            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -116,7 +120,7 @@ void mais_const(CompilingInfo *comp_info) {
         if (token_info.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos ','.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Identificador esperado apos ','.");
-            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -125,7 +129,7 @@ void mais_const(CompilingInfo *comp_info) {
         if (token_info.token_enum != IGUAL) {
             printf("Erro: '=' esperado apos identificador.\n");
             insert_error(comp_info, ERRO_SINTATICO, "'=' esperado apos identificador.");
-            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -134,7 +138,7 @@ void mais_const(CompilingInfo *comp_info) {
         if (token_info.token_enum != NUMERO) {
             printf("Erro: Numero esperado apos '='.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Numero esperado apos '='.");
-            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, VAR, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -150,7 +154,7 @@ void variavel(CompilingInfo *comp_info) {
         if (token_info.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos 'VAR'.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Identificador esperado apos 'VAR'.");
-            TokenType sync[] = {PONTO_E_VIRGULA, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -161,7 +165,7 @@ void variavel(CompilingInfo *comp_info) {
         if (token_info.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos declaracao de variavel.\n");
             insert_error(comp_info, ERRO_SINTATICO, "';' esperado apos declaracao de variavel.");
-            TokenType sync[] = {PONTO_E_VIRGULA, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -176,7 +180,7 @@ void mais_var(CompilingInfo *comp_info) {
         if (token_info.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos ','.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Identificador esperado apos ','.");
-            TokenType sync[] = {PONTO_E_VIRGULA, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, PROCEDURE, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -192,7 +196,7 @@ void procedimento(CompilingInfo *comp_info) {
         if (token_info.token_enum != IDENT) {
             printf("Erro: Identificador esperado apos 'PROCEDURE'.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Identificador esperado apos 'PROCEDURE'.");
-            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -201,7 +205,7 @@ void procedimento(CompilingInfo *comp_info) {
         if (token_info.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos identificador.\n");
             insert_error(comp_info, ERRO_SINTATICO, "';' esperado apos identificador.");
-            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -212,7 +216,7 @@ void procedimento(CompilingInfo *comp_info) {
         if (token_info.token_enum != PONTO_E_VIRGULA) {
             printf("Erro: ';' esperado apos bloco de procedimento.\n");
             insert_error(comp_info, ERRO_SINTATICO, "';' esperado apos bloco de procedimento.");
-            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
         }
@@ -233,7 +237,7 @@ void comando(CompilingInfo *comp_info) {
             } else {
                 printf("Erro: ':=' esperado apos identificador.\n");
                 insert_error(comp_info, ERRO_SINTATICO, "':=' esperado apos identificador.");
-                TokenType sync[] = {PONTO_E_VIRGULA, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+                TokenType sync[] = {PONTO_E_VIRGULA, CALL, BEGIN, IF, WHILE, END};
                 panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
                 return;
             }
@@ -244,7 +248,7 @@ void comando(CompilingInfo *comp_info) {
             if (token_info.token_enum != IDENT) {
                 printf("Erro: Identificador esperado apos 'CALL'.\n");
                 insert_error(comp_info, ERRO_SINTATICO, "Identificador esperado apos 'CALL'.");
-                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
                 panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
                 return;
             }
@@ -260,7 +264,7 @@ void comando(CompilingInfo *comp_info) {
                 
                 printf("Erro: 'END' esperado apos bloco de comandos.\n");
                 insert_error(comp_info, ERRO_SINTATICO, "'END' esperado apos bloco de comandos.");
-                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
                 panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
                 return;
             }
@@ -275,7 +279,7 @@ void comando(CompilingInfo *comp_info) {
             if (token_info.token_enum != THEN) {
                 printf("Erro: 'THEN' esperado.\n");
                 insert_error(comp_info, ERRO_SINTATICO, "'THEN' esperado.");
-                TokenType sync[] = {PONTO_E_VIRGULA, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+                TokenType sync[] = {PONTO_E_VIRGULA, CALL, BEGIN, IF, WHILE, END};
                 panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
                 return;
             }
@@ -291,7 +295,7 @@ void comando(CompilingInfo *comp_info) {
             if (token_info.token_enum != DO) {
                 printf("Erro: 'DO' esperado apos condicao.\n");
                 insert_error(comp_info, ERRO_SINTATICO, "'DO' esperado apos condicao.");
-                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
                 panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
                 return;
             }
@@ -350,7 +354,7 @@ void relacional(CompilingInfo *comp_info) {
         default:
             printf("Erro: Operador relacional esperado.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Operador relacional esperado.");
-            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
     }
@@ -401,7 +405,7 @@ void fator(CompilingInfo *comp_info) {
             if (token_info.token_enum != PARENTESE_DIREITA) {
                 printf("Erro: ')' esperado apos expressao.\n");
                 insert_error(comp_info, ERRO_SINTATICO, "')' esperado apos expressao.");
-                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+                TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
                 panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
                 return;
             }
@@ -410,7 +414,7 @@ void fator(CompilingInfo *comp_info) {
         default:
             printf("Erro: Fator invalido.\n");
             insert_error(comp_info, ERRO_SINTATICO, "Fator invalido.");
-            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END, ENDOFFILE};
+            TokenType sync[] = {PONTO_E_VIRGULA, IDENT, CALL, BEGIN, IF, WHILE, END};
             panic_mode(comp_info, sync, sizeof(sync)/sizeof(sync[0]));
             return;
     }
